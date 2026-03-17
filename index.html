@@ -3,920 +3,897 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>COFCO Traslados</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<title>Chacabuco Noroeste Tour S.R.L — Planilla de Viajes</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:Arial,sans-serif;font-size:13px;background:#f4f4f7;color:#222}
-#app{display:flex;height:100vh}
-#sidebar{width:210px;min-width:210px;background:#1a1a2e;color:#fff;display:flex;flex-direction:column;flex-shrink:0}
-.sb-logo{padding:18px 14px 14px;border-bottom:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;gap:10px}
-.sb-logo-icon{font-size:28px}
-.sb-logo-t{font-size:18px;font-weight:900;color:#c0392b;letter-spacing:1px}
-.sb-logo-s{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px}
-.sb-nav{flex:1;padding:10px 0;overflow-y:auto}
-.sb-item{display:flex;align-items:center;gap:10px;padding:12px 16px;color:rgba(255,255,255,0.6);cursor:pointer;border-left:3px solid transparent;font-size:13px;font-weight:500;transition:all 0.15s;user-select:none}
-.sb-item:hover{background:rgba(255,255,255,0.06);color:#fff}
-.sb-item.active{background:rgba(192,57,43,0.2);color:#fff;border-left-color:#c0392b;font-weight:700}
-.sb-icon{font-size:16px;width:22px;text-align:center}
-.sb-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.1)}
-.sb-user{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6}
-#main{flex:1;overflow-y:auto;padding:22px;background:#f4f4f7}
-.page{display:none}.page.active{display:block}
-.ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px}
-.ph h1{font-size:20px;font-weight:900;color:#1a1a2e}
-.ph p{font-size:12px;color:#888;margin-top:2px}
-.mes-nav{display:flex;align-items:center;gap:8px}
-.mn-btn{width:32px;height:32px;border:1px solid #ccc;background:#fff;border-radius:5px;font-size:18px;font-weight:900;cursor:pointer}
-.mes-label{font-size:14px;font-weight:800;color:#1a1a2e;min-width:165px;text-align:center}
-.btn{border:none;border-radius:5px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
-.btn:hover{opacity:0.85}
-.btn-red{background:#c0392b;color:#fff}
-.btn-green{background:#27ae60;color:#fff}
-.btn-blue{background:#2980b9;color:#fff}
-.btn-gray{background:#e0e0e0;color:#333}
-.btn-orange{background:#e67e22;color:#fff}
-.btn-purple{background:#8e44ad;color:#fff}
-.card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:16px;margin-bottom:14px}
-input,select,textarea{border:1.5px solid #ddd;border-radius:5px;padding:6px 9px;font-size:12px;background:#fff;color:#222;outline:none;font-family:Arial,sans-serif}
-input:focus,select:focus{border-color:#c0392b}
-table{border-collapse:collapse;width:100%}
-th,td{padding:7px 10px;text-align:left;font-size:12px}
-.kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
-.kpi{background:#fff;border-radius:8px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.08);border-left:4px solid #ddd}
-.kpi-val{font-size:19px;font-weight:900;color:#1a1a2e}
-.kpi-lbl{font-size:10px;color:#999;margin-top:2px;text-transform:uppercase;letter-spacing:0.5px}
-.kpi.azul{border-left-color:#2980b9}.kpi.azul .kpi-val{color:#2980b9}
-.kpi.naranja{border-left-color:#e67e22}.kpi.naranja .kpi-val{color:#e67e22}
-.kpi.rojo{border-left-color:#c0392b}.kpi.rojo .kpi-val{color:#c0392b}
-.kpi.verde{border-left-color:#27ae60}.kpi.verde .kpi-val{color:#27ae60}
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);display:flex;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;z-index:1000}
-.modal{background:#fff;border-radius:12px;width:100%;max-width:660px;box-shadow:0 20px 60px rgba(0,0,0,0.3);margin:auto}
-.modal-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 12px;border-bottom:2px solid #c0392b}
-.modal-top h2{font-size:17px;font-weight:900;color:#1a1a2e}
-.modal-body{padding:16px 20px;display:flex;flex-direction:column;gap:12px}
-.cho-bloque{border:1.5px solid #e0e0e0;border-radius:8px;padding:12px;background:#fafafa}
-.cho-bloque-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
-.cho-bloque-nombre{font-weight:800;font-size:13px;color:#c0392b;text-transform:uppercase}
-.turno-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px dashed #eee;flex-wrap:wrap}
-.badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
-.b-T{background:#d4edda;color:#155724}.b-F{background:#fff3cd;color:#856404}
-.b-G{background:#cce5ff;color:#004085}.b-VAC{background:#e2d9f3;color:#6f42c1}
-.b-LIC{background:#f8d7da;color:#721c24}
-.tab-btn{background:#e0e0e0;border:none;padding:7px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;margin-right:4px;transition:all 0.15s}
-.tab-btn.active{background:#c0392b;color:#fff}
-.dia-card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:12px;cursor:pointer;border:2px solid transparent;transition:border 0.15s}
-.dia-card:hover{border-color:#c0392b}
-.dia-card.fs{background:#fdf5f5}
-.periodo-cerrado{background:#f0faf0;border:1.5px solid #27ae60;border-radius:6px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
-.periodo-cerrado-label{font-weight:700;font-size:13px;color:#155724}
-.periodo-cerrado-info{font-size:11px;color:#666;margin-top:2px}
-@media(max-width:680px){
-  #sidebar{width:54px;min-width:54px}
-  .sb-logo-t,.sb-logo-s,.sb-item span:last-child,.sb-foot{display:none}
-  .sb-logo{justify-content:center;padding:14px 0}
-  .sb-item{justify-content:center;padding:14px 0}
-  #main{padding:10px}
+:root{
+  --bg:#f0f2f5;--surface:#fff;--border:#dde1e8;
+  --primary:#1a1a1a;--accent:#c0392b;--muted:#6b7280;
+  --green:#16a34a;--blue:#1d4ed8;--yellow:#d97706;
+  --font-display:'Barlow Condensed',sans-serif;
+  --font-body:'Barlow',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
 }
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--primary);font-family:var(--font-body);min-height:100vh;font-size:14px}
+
+.app-header{background:var(--primary);color:#fff;padding:0 24px;display:flex;align-items:center;justify-content:space-between;height:64px;border-bottom:3px solid var(--accent)}
+.brand{display:flex;align-items:center;gap:14px}
+.brand-logo{height:44px;filter:drop-shadow(0 0 2px rgba(255,255,255,0.3))}
+.brand-name{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:1px}
+.brand-sub{font-size:11px;color:#9ca3af;letter-spacing:2px;text-transform:uppercase}
+.header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+
+.period-bar{background:#111;padding:8px 24px;display:flex;align-items:center;gap:14px;border-bottom:1px solid #2d2d2d;flex-wrap:wrap}
+.period-label{font-size:12px;letter-spacing:2px;color:#6b7280;text-transform:uppercase;font-weight:600}
+.period-name{font-family:var(--font-display);font-size:17px;font-weight:700;color:#fff;letter-spacing:1px}
+.period-badge{background:rgba(192,57,43,.2);border:1px solid rgba(192,57,43,.5);color:#f87171;font-size:11px;padding:3px 10px;border-radius:20px;font-weight:600}
+.period-badge.closed{background:rgba(22,163,74,.15);border-color:rgba(22,163,74,.4);color:#4ade80}
+
+.main{padding:20px 24px}
+
+.btn{display:inline-flex;align-items:center;gap:5px;padding:8px 15px;border-radius:7px;border:none;font-family:var(--font-body);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;white-space:nowrap}
+.btn:hover{filter:brightness(.9)}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-dark{background:var(--primary);color:#fff}
+.btn-outline{background:#fff;color:var(--primary);border:1.5px solid var(--border)}
+.btn-green{background:#16a34a;color:#fff}
+.btn-yellow{background:#d97706;color:#fff}
+.btn-blue{background:#1d4ed8;color:#fff}
+.btn-danger{background:#dc2626;color:#fff}
+.btn-purple{background:#7c3aed;color:#fff}
+.btn-sm{padding:5px 11px;font-size:12px}
+
+.tarifa-strip{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:11px 18px;margin-bottom:14px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.tarifa-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-right:4px}
+.tarifa-input{border:1.5px solid var(--border);border-radius:6px;padding:5px 9px;font-family:var(--font-mono);font-size:13px;font-weight:600;width:110px;outline:none;transition:border-color .15s;background:#f9fafb}
+.tarifa-input:focus{border-color:var(--accent)}
+.t-sep{width:1px;height:28px;background:var(--border)}
+
+.stats-bar{display:grid;grid-template-columns:repeat(5,1fr);gap:11px;margin-bottom:14px}
+.stat-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;padding:13px 15px}
+.stat-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;font-weight:600;margin-bottom:3px}
+.stat-val{font-family:var(--font-display);font-size:26px;font-weight:800;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted);margin-top:2px}
+.c-red{color:var(--accent)}.c-blue{color:var(--blue)}.c-green{color:var(--green)}.c-yellow{color:var(--yellow)}
+
+.toolbar{display:flex;gap:10px;margin-bottom:13px;align-items:center;flex-wrap:wrap}
+.search-box{border:1.5px solid var(--border);border-radius:7px;padding:8px 13px;font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .15s;width:220px;background:#fff}
+.search-box:focus{border-color:var(--accent)}
+
+.table-wrap{background:#fff;border-radius:12px;border:1.5px solid var(--border);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead tr{background:var(--primary);color:#fff}
+th{padding:9px 9px;text-align:left;font-family:var(--font-display);font-size:11px;letter-spacing:1px;font-weight:700;white-space:nowrap;border-right:1px solid #333}
+th:last-child{border-right:none}
+tbody tr{border-bottom:1px solid #edf0f4;transition:background .1s}
+tbody tr:hover{background:#fafbfc}
+td{padding:6px 7px;vertical-align:middle;border-right:1px solid #f0f2f5}
+td:last-child{border-right:none}
+
+.ci{border:none;background:transparent;font-family:var(--font-body);font-size:13px;color:var(--primary);width:100%;outline:none;padding:2px 3px;border-radius:4px;transition:background .15s}
+.ci:focus{background:#fef3f2;outline:2px solid #e74c3c}
+.ci.mono{font-family:var(--font-mono)}
+.ci-sel{border:none;background:transparent;font-family:var(--font-body);font-size:13px;color:var(--primary);width:100%;outline:none;cursor:pointer;padding:2px 3px}
+.ci-sel:focus{background:#fef3f2}
+
+.amt{font-family:var(--font-mono);font-weight:600;text-align:right}
+.amt-costo{color:var(--accent)}.amt-importe{color:var(--blue)}.amt-total{color:var(--green)}
+.amt-km{color:var(--blue)}.amt-esp{color:var(--yellow)}
+.td-r{text-align:right}.td-c{text-align:center}
+
+tfoot tr td{background:#f7f8fa;font-weight:700;border-top:2px solid var(--border);font-family:var(--font-mono);font-size:12px}
+.add-row{width:100%;padding:10px;background:#f7f8fa;border:none;cursor:pointer;font-family:var(--font-body);font-size:13px;color:var(--muted);font-weight:500;transition:background .15s;border-top:1.5px dashed var(--border)}
+.add-row:hover{background:#eef0f3;color:var(--primary)}
+
+.modal-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:20px}
+.modal-ov.open{display:flex}
+.modal{background:#fff;border-radius:14px;width:100%;max-width:620px;box-shadow:0 20px 60px rgba(0,0,0,.2);animation:popIn .2s ease}
+@keyframes popIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-hdr{display:flex;justify-content:space-between;align-items:center;padding:18px 22px;border-bottom:1.5px solid var(--border)}
+.modal-ttl{font-family:var(--font-display);font-size:20px;font-weight:800;letter-spacing:1px}
+.modal-bod{padding:18px 22px;max-height:70vh;overflow-y:auto}
+.x-btn{background:#f3f4f6;border:none;width:30px;height:30px;border-radius:7px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center}
+
+.p-item{display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-radius:8px;border:1.5px solid var(--border);margin-bottom:7px;transition:all .15s}
+.p-item:hover{border-color:var(--accent)}
+.p-item.cur{border-color:var(--accent);background:#fef3f2}
+.p-item-name{font-family:var(--font-display);font-size:16px;font-weight:700}
+.p-item-meta{font-size:12px;color:var(--muted)}
+
+.confirm-ov{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;align-items:center;justify-content:center;padding:20px}
+.confirm-ov.open{display:flex}
+.confirm-box{background:#fff;border-radius:14px;padding:26px;max-width:400px;width:100%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+.confirm-ttl{font-family:var(--font-display);font-size:22px;font-weight:800;margin-bottom:7px}
+.confirm-txt{color:var(--muted);font-size:14px;line-height:1.6;margin-bottom:18px}
+
+.toast{position:fixed;bottom:22px;right:22px;background:var(--primary);color:#fff;padding:11px 18px;border-radius:10px;font-weight:600;font-size:13px;z-index:999;transform:translateY(80px);transition:transform .3s}
+.toast.show{transform:translateY(0)}
+.toast.ok{background:#16a34a}.toast.err{background:#dc2626}
+
+.del-btn{background:none;border:none;cursor:pointer;color:#d1d5db;font-size:15px;padding:3px 5px;border-radius:4px;transition:all .15s}
+.del-btn:hover{background:#fee2e2;color:var(--accent)}
+
+.app-tab{background:none;border:none;padding:12px 24px;font-family:var(--font-display);font-size:15px;font-weight:700;letter-spacing:1px;cursor:pointer;color:var(--muted);border-bottom:3px solid transparent;transition:all .2s;text-transform:uppercase}
+.app-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:#fff8f7}
+.app-tab:hover:not(.active){color:var(--primary)}
+.app-page{display:none}.app-page.active{display:block}
+
+/* RECORRIDOS */
+.rec-calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:20px}
+.rec-day-card{background:#fff;border:1.5px solid var(--border);border-radius:10px;overflow:hidden;min-height:120px;cursor:pointer;transition:border-color .15s}
+.rec-day-card:hover{border-color:var(--accent)}
+.rec-day-header{background:var(--primary);color:#fff;padding:8px 12px;font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:1px;display:flex;justify-content:space-between;align-items:center}
+.rec-day-header.domingo{background:var(--accent)}
+.rec-day-header.sabado{background:#7c3aed}
+.rec-day-header.viernes{background:#1d4ed8}
+.month-nav{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.month-title{font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:2px}
+.dow-headers{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:6px}
+.dow-hdr{text-align:center;font-family:var(--font-display);font-size:12px;font-weight:700;letter-spacing:1px;color:var(--muted);text-transform:uppercase;padding:4px}
+.dow-hdr.dom{color:var(--accent)}.dow-hdr.sab{color:#7c3aed}.dow-hdr.vie{color:var(--blue)}
+.rec-day-empty{background:#f9fafb;border:1.5px solid #edf0f4;border-radius:10px;min-height:80px}
+
+/* CRONOGRAMA */
+.cron-table{border-collapse:collapse;font-size:11px}
+.cron-table th{background:var(--primary);color:#fff;padding:6px 4px;text-align:center;font-family:var(--font-display);font-size:10px;letter-spacing:.5px;white-space:nowrap;min-width:30px}
+.cron-table th.dom-col{background:var(--accent)}
+.cron-table th.sab-col{background:#7c3aed}
+.cron-table td{padding:4px 2px;text-align:center;cursor:pointer;border:1px solid #f0f2f5;font-weight:700;font-size:10px;min-width:30px;transition:filter .1s}
+.cron-table td:hover{filter:brightness(.88)}
+.cron-table td.name-cell{text-align:left;padding:4px 10px;font-weight:700;font-size:12px;background:#fff;position:sticky;left:0;z-index:1;white-space:nowrap;border-right:2px solid var(--border);cursor:default}
+.cron-table td.name-cell:hover{filter:none}
+.cron-table tr:nth-child(even) td.name-cell{background:#fafafa}
+.cron-table td.sum-cell{background:#f7f8fa;font-family:var(--font-mono);font-size:11px;cursor:default;border-left:2px solid var(--border)}
+.cron-table td.sum-cell:hover{filter:none}
+.estado-T{background:#d1fae5;color:#065f46}
+.estado-F{background:#fef3c7;color:#92400e}
+.estado-G{background:#dbeafe;color:#1e40af}
+.estado-VAC{background:#ede9fe;color:#5b21b6}
+.estado-LIC{background:#fee2e2;color:#991b1b}
+
+/* LIQUIDACION */
+.liq-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;margin-bottom:20px}
+.liq-card{background:#fff;border:1.5px solid var(--border);border-radius:12px;overflow:hidden}
+.liq-card-header{background:var(--primary);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center}
+.liq-chofer-name{font-family:var(--font-display);font-size:18px;font-weight:700;letter-spacing:1px}
+.liq-card-body{padding:14px 16px}
+.liq-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid #f0f2f5;font-size:13px}
+.liq-row:last-child{border-bottom:none}
+.liq-label{color:var(--muted)}
+.liq-val{font-family:var(--font-mono);font-weight:600}
+.liq-total-row{background:#f7f8fa;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-top:2px solid var(--border)}
+.liq-total-label{font-family:var(--font-display);font-size:14px;font-weight:700;letter-spacing:1px}
+.liq-total-val{font-family:var(--font-mono);font-size:20px;font-weight:700;color:var(--green)}
+.liq-det-row{display:flex;gap:6px;padding:3px 0;font-size:11px;border-bottom:1px solid #f5f5f5;color:var(--muted)}
+.liq-det-row .dia{font-weight:700;color:var(--primary);min-width:55px}
+.liq-det-row .hrs{font-family:var(--font-mono);color:var(--accent);margin-left:auto}
+
+.chofer-tag{display:inline-flex;align-items:center;gap:6px;background:#f0f2f5;border:1px solid var(--border);border-radius:20px;padding:4px 12px;font-size:13px;font-weight:600;margin:4px}
+.chofer-tag .remove{cursor:pointer;color:var(--muted);font-size:14px}
+.chofer-tag .remove:hover{color:var(--accent)}
 </style>
 </head>
 <body>
-<div id="app">
-<div id="sidebar">
-  <div class="sb-logo">
-    <div class="sb-logo-icon">🚌</div>
-    <div><div class="sb-logo-t">COFCO</div><div class="sb-logo-s">TRASLADOS</div></div>
+
+<header class="app-header">
+  <div class="brand">
+    <img class="brand-logo" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAkGBxISERUQEBMVEhUWEhUVEBYREhAXFRUXGBIWFxUVFRUYHSggGBslHxUVITEiJSkrLi4wGB8zODMsOCgtLisBCgoKDQ0NGQ8PFzcZFx8rKy0rMis3Ky0rLTcrNys3LTcrLSstLSstMC0tMDIrNystNy03LTY3Ny8rLSs3LTcrK//AABEIALcBEwMBIgACEQEDEQH/xAAcAAEAAgIDAQAAAAAAAAAAAAAABgcBBQMECAL/xABHEAACAQICBQcHCQUHBQAAAAAAAQIDEQQhBQYxQWEHEhMiUXGBMkJTVJHR0hQVFiNSk5ShwReSorHhM0NicnOC8EVjhKOz/8QAGgEBAQADAQEAAAAAAAAAAAAAAAECAwYEBf/EACQRAQACAgEDAwUAAAAAAAAAAAABAgMRBBIxUQUhIhMjQmFx/9oADAMBAAIRAxEAPwC8QAAAAAAAAAAAAAAAAAAAAAAAAcGLxcKUJVaslCEIuU5S2JJXbIsuU/RPra+6r/ABMCOaz6UcbUabae2bTat2RvxNbiuVHRag3DEqUrdVKnXze7zSHVddMFKTlKum27t8yr8IEi+WVfS1PvJ+8fLKvpKn3k/eR6GtmCbSVdXbslzal29iSXN25oli0FXtfmZWvnKCy9pYR1PllX0lT7yfvHy2r6Sp95P3nC0fVGk5yUYq7bshI3Or9OrVqXlUqOEc5deeb3LaS86mjsEqVNQj/ufa97O2RQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjmvms8dH4Sdd2dR9TDxfnVGnbLsWbfBAVxy3623a0ZQnkmpYtx35XhSfDZJr/AClRHJXrynOVSpJynKTlOT2uTd293bPeyeAANlq7oWpjcTTwtHypS60t0IrOUm+CS+gEi5GtUvlFd46tH6qi7UU9k6u98YxX5vgW1rNo/mR6KL60vKtuj2eOdoBhiqdPCYV1aiirU4q7bsrlPJKKbeSSV27GKXe29/3A0Gs2sekq2XOj5EH7ZH9zVXiM22e1vd+AAyK9OVOcqdROMoScZRe1NO2TPIYG1MxKLuou63PO17Pb3oqOqGnfk1RS/Kk8l2LY3wXiB3tW9Iyoz5svKhK0brdG1ru/b2FmXtfMiOi9N1MNUVak+zOL1o8V4Gfm1Z1a6y2O5K+iA3mjtZsTQso1ZJfZl1o+Df+SZYD1c0nK1p4em3xaqSX4mFBBe3jz7Dn0vqDRq3dTD0292USS+CRcGj+VnW0I2eJhXXCpRpSf43i/wBDEAqX17yHb/iGW0dq/pHFZVMROEeCpU6cIrtai3J+LZ6TonU3RmEadLCU3L7dT6Sbe17+VFJd7RrMPp7HUHejiq0OFqk2vBq5fOi9bNZKXTUrQ6xlh5S+biu0CiW37UreR2NHYOVWpGlBXcntXAg1TlJ2jFyb2Jatt8Eu01GN09WqSUIJyk9y2tgdHReipYqoqcd262v7K7WdXR+j6mJqKlTSu9rbUUt7LI0JoeVCnzJasnsvup8Cv9K6bqYmo6lV9i3JbEgOn0M0lOnfCVNkNtNv60P3gv+Js9J6y4yrc0acKS3PLP2S6/wDg56Bvcd+pOl57HNGcnOTlJtttttvazIrqPCYinVgqlKcZxa2Si01fvRigA5MJhJVakadNXlJ2R2tCaCqYqtyI5R2Ocssk+CXe+w3egdGSxFVU12PWl9iP7u4tD5NoqpWlV6vVYdJRvpSbfHgTrqOp2rkWkdX8Mrqbk80lpuWlv87bP8AQA8f07G5IAAAAAB87j9OVsNV5s00/Kpvyx7V2ruZ9EVto3H1MLVjVpPS9mz9mXYa/RGr9XE0VVhPJrOMk7xi/wBv93gSHTOiKmHqOnUT4xktkovgy5OTXXIy2bfKMgAblFqSas092u4y6K08J2nPe0s0U6mr8MNTF0aGNWh68V2fTSatBvhF3d32kVxGjJV6kYUYynJ5JRSu22kkl3kXIqM0rY1zWiRzXN1djWbTfSpSqxd6bUUl4pFZzxuJr1pqFKMpPZFb2ys0GqWGVNyxVVzlyIKMVdPc7vNl62p9bpSfQ4SKi3vqS6z9kTwwVu3PeY0rV6ulp3/AGNxB2lOvTlTs1N6S33tzdt2V0r+DRYQ0WnrDe6y2yO3q2vffd+v9DxTl07X7i5NMvtJrfaY5I1FSlKnJbJJpotYYqnSp0sFiIN4aUpSj90a70u8ru0Xs4vbwNrWqSjFpO7fBL9TUOzjJOElZxaaexxejXaYx5+nFOvPLlf7Wq8mrUaW2nVk1b8K2r8EVhrVprS69BZdX5q1iVg3h6n5YO8fCXFdy+F+BFMRjakpSdKmm3Hp3cI9W6a4ZvKN1p7rST+pSnfudk97XHh2A6/I/q+8XiPl9Ve9KHV47JfkuyL47OwsHVjUP5sp4+tHLm1afCUOmXVU1fTK223v+ZnUbRcMFQjQhJyUbt3teTbcpPgrt9iRkAAAAAAAAAAAAAAAAAAAAAAIlrJoN4mKnC3TQz6y+svvx7vfxJaACq6VOrCo6VSMoyi7Si1ZprdZnDWlrhqxoGOFxtZwjlSrS50ey3nLuvdN9qZ7gAAxW2oCrNd9GuvhauFi7c6OmUusqb0n3O0u5Mog8ua3pxlB+TJNfE9LaF1oeTByoTn06S6kbySbp5XjC727+aNtU0dRqValWlUlGVWcp5Ri5NTaycl3X3kddE7M+yVlnJwniOzJOT4pO1+5bz02n8M9C6Z5kaWcot/eTjv/Mla1sKSjj1UXlVIKT7Ytxb9r37PW7EXbMr4eGnGrMR2FqNiKsqMqFSo3zLPJ7tN22T3PdfcahXs3drjx3tvuuVxonQVKrGMpVd3Wclz6T2JeSlZp7b2eZNZaJXg5ynajLa3t3aJY9zF1bT5N9I/WNYlHpd3bYn9yMrGqFJK3SN33yCy4R2LiVJiKdqj6O22NQ1OZOP0u3tX5GwlH0j3A0yST/MVLisZGMXKbSSzbb2ICJq1ZRpwc5vKMVdlB+m4aSqXjgVzot9K/wDpvbL27tvaTi8rdOqe3rrWNB6ejia0aSuk3e9m0ku09xOW7W+9t8SBaN09LDVlWine1m78mntXb3fqXxhMXTrQVWjNThJXUk00VIzSuJx1PZH+i77fzrpj9/F8+n0TGC8Vc4wAAAAABgzIBBteNXqsassbho3nFZzo7K67V2+K7Ss2gRbXLQcqE3VoxvSlq3jHPmv7L+XcBO+hqKoU401shFQWl7IpasuN4rJpWKFqOVpJN2Tzu7v9N/cW3RVjmkpSySya7/1MkZrmmrqsAAAAAAAAAAAAAAAAAAAAAAAAAI/rDoH5dCyvaq+qt7XGXgAAIDiYOlKUJq0ou0k9qfE5sHiXSqRqR2x1p8V2mz01dU6q7L5nLjsPGqrPJ7nt4MiqkXCTi9qb8DHpfTzrR5w+uvqaZwAA38e/3mJy2Pkxuu+3xLW5Ptar5xXXitf7XUl3Rj7SqMDTUKajHJFj1/eTOWjDjXuV+kvCTadne5SWvmqk3znGp1c4Qi0k02m7Ja03nh2GCnVSr1IRWUHL0I7viyiNddYZ1uahTly4bXqxve/sBpte9Ya+kKzrV+rFeTBPhFfm+JE1YoobdYk8opLNJLuWRFxioqyVkuBd2oeqsMFhnhqcnJSkpyk7ZuUUrJ8lGC2dy2OdTCUalNVMRJRlK1ozpNre7rJxv29rNbTqRqx50HdMrR1TbLmrxtXPbdZl0aN0EZxknSnFxxFVR0SnS6Ul1tNVLe/Sj2Hs9KaJxuOo1MDCtCMXDTSqOqoq1rSslJ5Wb7WZpPWlhVdPzuOXM1nzjJdTN5K+7zz2V+S7Gst7eJYmidSXOnOr0VCvGP0pxjLo82pLZot67brkbXQGhZYWHPqThOu+VyoXhDt6OlSUllp4ttu8ibrTsY1SlS5kpzWv8Aq9d/38x3MTXlF5bEnnm0nxbMqjCbzWy+/j+xraClFyaV7J8lf8/AJJpd29oTktTd17L17WNMnFxi72e3K2bfJHPGWxreVOCR1tE4ijRhOrVkkoxbu3lktsWdkfYaKdOMqcZq14tq8XdNXtzXwZJ9DaAoUFzpNVa76zteLa2Qvsj29p2hQjGmlCKjHKyhFJKKSySSWSSPGnW5n2R+8SnFbHQAABkAAAAAAAAAAAAAAAAAAAAAAAAYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/2Q==" alt="Logo">
+    <div>
+      <div class="brand-name">CHACABUCO NOROESTE TOUR</div>
+      <div class="brand-sub">S.R.L — Planilla de Viajes</div>
+    </div>
   </div>
-  <div class="sb-nav">
-    <div class="sb-item active" onclick="showPage('recorridos')"><span class="sb-icon">📅</span><span>Recorridos</span></div>
-    <div class="sb-item" onclick="showPage('extras')"><span class="sb-icon">📋</span><span>Extras</span></div>
-    <div class="sb-item" onclick="showPage('cronograma')"><span class="sb-icon">🗓️</span><span>Cronograma</span></div>
-    <div class="sb-item" onclick="showPage('liquidacion')"><span class="sb-icon">💰</span><span>Liquidación</span></div>
-    <div class="sb-item" onclick="showPage('choferes')"><span class="sb-icon">🚗</span><span>Choferes</span></div>
+  <div class="header-right">
+    <button class="btn btn-outline btn-sm" onclick="openPeriodsModal()">📁 Períodos</button>
+    <button class="btn btn-blue btn-sm" onclick="exportExcel()">⬇ Excel</button>
+    <button class="btn btn-yellow btn-sm" onclick="confirmFinalizar()">🔒 Finalizar Período</button>
+    <button class="btn btn-green btn-sm" onclick="nuevoPeriodo()">+ Nuevo Período</button>
   </div>
-  <div class="sb-foot"><div class="sb-user">💾 Datos guardados en el navegador</div></div>
+</header>
+
+<div class="period-bar">
+  <span class="period-label">Período:</span>
+  <span class="period-name" id="pName">—</span>
+  <span class="period-badge" id="pBadge">ABIERTO</span>
+  <span style="margin-left:auto;color:#6b7280;font-size:12px" id="pDates"></span>
 </div>
 
-<div id="main">
-
-<!-- RECORRIDOS -->
-<div id="page-recorridos" class="page active">
-  <div class="ph">
-    <div><h1>📅 Recorridos</h1><p>Recorridos diarios por chofer</p></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <div class="mes-nav">
-        <button class="mn-btn" onclick="cambiarMes(-1,'rec')">‹</button>
-        <span class="mes-label" id="rec-mes-label"></span>
-        <button class="mn-btn" onclick="cambiarMes(1,'rec')">›</button>
-      </div>
-      <button class="btn btn-blue" onclick="exportarRecJPG()">📷 Exportar JPG</button>
-    </div>
-  </div>
-  <div id="rec-grid-wrap">
-    <div id="rec-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px"></div>
-  </div>
-  <div id="rec-modal" style="display:none"></div>
+<div style="background:#fff;border-bottom:2px solid var(--border);display:flex;gap:0;flex-wrap:wrap">
+  <button class="app-tab active" id="tab-viajes" onclick="switchAppTab('viajes')">🚌 Planilla de Viajes</button>
+  <button class="app-tab" id="tab-recorridos" onclick="switchAppTab('recorridos')">📅 Recorridos COFCO</button>
+  <button class="app-tab" id="tab-cronograma" onclick="switchAppTab('cronograma')">🗓️ Cronograma Francos</button>
+  <button class="app-tab" id="tab-liquidacion" onclick="switchAppTab('liquidacion')">💰 Liquidación</button>
 </div>
 
-<!-- EXTRAS -->
-<div id="page-extras" class="page">
-  <div class="ph">
-    <div><h1>📋 Extras</h1><p>Registro de viajes y tarifas</p></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <div class="mes-nav">
-        <button class="mn-btn" onclick="cambiarMes(-1,'ext')">‹</button>
-        <span class="mes-label" id="ext-mes-label"></span>
-        <button class="mn-btn" onclick="cambiarMes(1,'ext')">›</button>
-      </div>
-      <button class="btn btn-orange" onclick="abrirCierrePeriodo()">🔒 Cerrar período</button>
-    </div>
+<!-- ═══════════════════════════════ VIAJES ═══════════════════════════════ -->
+<div id="app-viajes" class="app-page active">
+<div class="main">
+  <div class="stats-bar">
+    <div class="stat-card"><div class="stat-lbl">Viajes</div><div class="stat-val" id="sViajes">0</div><div class="stat-sub">registros</div></div>
+    <div class="stat-card"><div class="stat-lbl">KM Total</div><div class="stat-val c-blue" id="sKm">0</div><div class="stat-sub">kilómetros</div></div>
+    <div class="stat-card"><div class="stat-lbl">HB Espera</div><div class="stat-val c-yellow" id="sHoras">0</div><div class="stat-sub">horas facturadas al cliente</div></div>
+    <div class="stat-card"><div class="stat-lbl">Costo Ext.</div><div class="stat-val c-red" id="sCosto">$0</div><div class="stat-sub">pasajeros extra</div></div>
+    <div class="stat-card"><div class="stat-lbl">Total General</div><div class="stat-val c-green" id="sTotal">$0</div><div class="stat-sub">importe acumulado</div></div>
   </div>
 
-  <!-- Períodos cerrados -->
-  <div id="periodos-cerrados-sec" style="display:none">
-    <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#155724">📁 Períodos cerrados</div>
-    <div id="periodos-lista"></div>
+  <div class="tarifa-strip">
+    <span style="font-family:var(--font-display);font-size:13px;font-weight:700;letter-spacing:1px;color:var(--muted)">TARIFAS AL CLIENTE:</span>
+    <span class="tarifa-label">$/KM</span><input type="number" class="tarifa-input" id="tKm" value="497.22" step="0.01" onchange="recalcAll()">
+    <div class="t-sep"></div>
+    <span class="tarifa-label">$/H ESPERA <small style="font-size:9px;color:#9ca3af">(factura al cliente)</small></span><input type="number" class="tarifa-input" id="tEsp" value="3808.60" step="0.01" onchange="recalcAll()">
+    <div class="t-sep"></div>
+    <span class="tarifa-label">Base AUTO</span><input type="number" class="tarifa-input" id="tAuto" value="21698.58" step="0.01" onchange="recalcAll()">
+    <div class="t-sep"></div>
+    <span class="tarifa-label">Base COMBI</span><input type="number" class="tarifa-input" id="tCombi" value="43397.16" step="0.01" onchange="recalcAll()">
   </div>
 
-  <div class="kpi-grid" id="ext-kpis"></div>
-  <div class="card" style="padding:12px 16px">
-    <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
-      <span style="font-weight:700;font-size:12px">TARIFAS:</span>
-      <label style="font-size:12px;font-weight:600">$/KM <input type="number" id="t-km" style="width:90px" step="0.01" oninput="saveTarifa()"></label>
-      <label style="font-size:12px;font-weight:600">$/H ESPERA <input type="number" id="t-esp" style="width:90px" step="0.01" oninput="saveTarifa()"></label>
-      <label style="font-size:12px;font-weight:600">BASE AUTO <input type="number" id="t-auto" style="width:100px" step="0.01" oninput="saveTarifa()"></label>
-      <label style="font-size:12px;font-weight:600">BASE COMBI <input type="number" id="t-combi" style="width:100px" step="0.01" oninput="saveTarifa()"></label>
-    </div>
+  <div class="toolbar">
+    <button class="btn btn-primary" onclick="addRow()">+ Agregar fila</button>
+    <input type="text" class="search-box" placeholder="🔍 Buscar chofer o detalle..." oninput="filterTable(this.value)">
+    <span style="margin-left:auto;font-size:12px;color:var(--muted)" id="rowCount">0 registros</span>
   </div>
-  <div class="card" style="padding:0;overflow:hidden">
-    <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #eee;flex-wrap:wrap">
-      <button class="btn btn-red" onclick="abrirNuevoExtra()">+ Agregar fila</button>
-      <input type="text" id="ext-busqueda" placeholder="🔍 Buscar chofer o detalle..." style="width:240px" oninput="renderExt()">
-      <span id="ext-count" style="margin-left:auto;font-size:11px;color:#999"></span>
-    </div>
-    <div style="overflow-x:auto">
-      <table>
-        <thead><tr style="background:#1a1a2e;color:#fff">
-          <th style="width:28px">#</th><th>Fecha</th><th>Chofer</th><th>Horario</th><th>Detalle</th>
-          <th>Costo Ext.</th><th>Tipo</th><th>KM</th><th>Hs Espera</th>
-          <th>Importe</th><th>Total</th><th style="width:55px"></th>
-        </tr></thead>
-        <tbody id="ext-tbody"></tbody>
+
+  <div class="table-wrap">
+    <div class="table-scroll">
+      <table id="mainTable">
+        <thead>
+          <tr>
+            <th>#</th><th>FECHA</th><th>CHOFER</th><th>HORARIO</th>
+            <th style="min-width:260px">DETALLE</th>
+            <th>COSTO EXT.<br>PASAJE</th><th>TIPO</th><th>KM</th>
+            <th>HB ESPERA<br><small style="font-size:9px;opacity:.7">factura al cliente</small></th>
+            <th>IMPORTE</th><th>IMPORTE<br>TOT</th>
+            <th id="thKm">KM</th><th id="thEsp">ESPERA</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="5" style="font-family:var(--font-display);font-size:12px;letter-spacing:1px;padding:9px 10px;color:var(--muted)">TOTALES DEL PERÍODO</td>
+            <td class="amt amt-costo td-r" id="totCosto"></td><td></td>
+            <td class="amt td-r c-blue" id="totKm"></td>
+            <td class="amt td-r c-yellow" id="totHoras"></td>
+            <td class="amt amt-importe td-r" id="totImp"></td>
+            <td class="amt amt-total td-r" id="totTot"></td>
+            <td class="amt amt-km td-r" id="totKmV"></td>
+            <td class="amt amt-esp td-r" id="totEspV"></td>
+            <td></td>
+          </tr>
+        </tfoot>
       </table>
     </div>
+    <button class="add-row" onclick="addRow()">+ Agregar nuevo registro</button>
   </div>
-  <div id="ext-modal" style="display:none"></div>
+</div>
 </div>
 
-<!-- CRONOGRAMA -->
-<div id="page-cronograma" class="page">
-  <div class="ph">
-    <div><h1>🗓️ Cronograma</h1><p>Planificación mensual de francos</p></div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <div>
-        <button class="tab-btn active" id="ct-chofer" onclick="setCronTipo('chofer')">🚗 Choferes</button>
-        <button class="tab-btn" id="ct-personal" onclick="setCronTipo('personal')">👤 Personal</button>
+<!-- ═══════════════════════════════ RECORRIDOS ═══════════════════════════════ -->
+<div id="app-recorridos" class="app-page" style="padding:20px 24px"></div>
+
+<!-- ═══════════════════════════════ CRONOGRAMA ═══════════════════════════════ -->
+<div id="app-cronograma" class="app-page" style="padding:20px 24px">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:2px">CRONOGRAMA DE FRANCOS</div>
+      <div style="font-size:12px;color:var(--muted);margin-top:2px">Clic en una celda para cambiar el estado · T=Trabaja F=Franco G=Guardia VAC=Vacaciones LIC=Licencia</div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;align-items:center;gap:8px">
+        <button class="btn btn-outline btn-sm" onclick="cronPrevMonth()">‹</button>
+        <span id="cron-month-label" style="font-family:var(--font-display);font-size:16px;font-weight:800;min-width:160px;text-align:center"></span>
+        <button class="btn btn-outline btn-sm" onclick="cronNextMonth()">›</button>
       </div>
-      <div class="mes-nav">
-        <button class="mn-btn" onclick="cambiarMes(-1,'cron')">‹</button>
-        <span class="mes-label" id="cron-mes-label"></span>
-        <button class="mn-btn" onclick="cambiarMes(1,'cron')">›</button>
-      </div>
-      <button class="btn btn-red" onclick="guardarCronograma()">💾 Guardar</button>
-      <button class="btn btn-blue" onclick="exportarCronJPG()">📷 Exportar JPG</button>
+      <button class="btn btn-sm" style="background:#e0e7ff;color:#3730a3" onclick="cronSwitch('chofer')" id="cron-btn-chofer">🚗 Choferes</button>
+      <button class="btn btn-sm btn-outline" onclick="cronSwitch('personal')" id="cron-btn-personal">👤 Personal COFCO</button>
+      <button class="btn btn-green btn-sm" onclick="saveCron()">💾 Guardar</button>
     </div>
   </div>
-  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
-    <span class="badge b-T">T — Trabaja</span><span class="badge b-F">F — Franco</span>
-    <span class="badge b-G">G — Guardia</span><span class="badge b-VAC">VAC — Vacaciones</span>
-    <span class="badge b-LIC">LIC — Licencia</span>
-    <span style="font-size:11px;color:#aaa;margin-left:4px">💡 Clic en celda para cambiar</span>
+  <!-- leyenda -->
+  <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px">
+    <span style="background:#d1fae5;color:#065f46;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">T — Trabaja</span>
+    <span style="background:#fef3c7;color:#92400e;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">F — Franco</span>
+    <span style="background:#dbeafe;color:#1e40af;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">G — Guardia</span>
+    <span style="background:#ede9fe;color:#5b21b6;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">VAC — Vacaciones</span>
+    <span style="background:#fee2e2;color:#991b1b;padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700">LIC — Licencia</span>
   </div>
-  <div id="cron-wrap" class="card" style="padding:0;overflow:auto;max-height:70vh">
-    <table style="font-size:11px;min-width:900px">
-      <thead id="cron-head"></thead>
-      <tbody id="cron-body"></tbody>
-    </table>
+  <div style="overflow:auto;max-height:70vh;background:#fff;border-radius:12px;border:1.5px solid var(--border)">
+    <table class="cron-table" id="cron-table" style="min-width:900px"></table>
   </div>
 </div>
 
-<!-- LIQUIDACION -->
-<div id="page-liquidacion" class="page">
-  <div class="ph">
-    <div><h1>💰 Liquidación</h1><p>Horas trabajadas y liquidación mensual por chofer</p></div>
-    <div class="mes-nav">
-      <button class="mn-btn" onclick="cambiarMes(-1,'liq')">‹</button>
-      <span class="mes-label" id="liq-mes-label"></span>
-      <button class="mn-btn" onclick="cambiarMes(1,'liq')">›</button>
-      <button class="btn btn-gray" onclick="renderLiq()" style="margin-left:6px;padding:7px 10px">🔄</button>
-    </div>
+<!-- ═══════════════════════════════ LIQUIDACION ═══════════════════════════════ -->
+<div id="app-liquidacion" class="app-page" style="padding:20px 24px"></div>
+
+<!-- MODAL PERÍODOS -->
+<div class="modal-ov" id="periodsModal">
+  <div class="modal">
+    <div class="modal-hdr"><div class="modal-ttl">📁 PERÍODOS GUARDADOS</div><button class="x-btn" onclick="closeM('periodsModal')">✕</button></div>
+    <div class="modal-bod"><div style="margin-bottom:12px"><button class="btn btn-green btn-sm" onclick="nuevoPeriodo();closeM('periodsModal')">+ Nuevo período</button></div><div id="pList"></div></div>
   </div>
-  <div class="kpi-grid" id="liq-kpis"></div>
-  <div id="liq-lista"></div>
 </div>
 
-<!-- CHOFERES -->
-<div id="page-choferes" class="page">
-  <div class="ph">
-    <div><h1>🚗 Choferes</h1><p>Gestión de choferes del sistema</p></div>
-    <button class="btn btn-red" onclick="abrirModalPersona(null,'chofer')">+ Nuevo chofer</button>
-  </div>
-  <div class="card" style="padding:0;overflow:hidden">
-    <table>
-      <thead><tr style="background:#1a1a2e;color:#fff"><th>Apellido y Nombre</th><th>Tipo</th><th>Estado</th><th>Acciones</th></tr></thead>
-      <tbody id="cho-tbody"></tbody>
-    </table>
-  </div>
-  <div style="margin-top:24px">
-    <div class="ph">
-      <div><h1>👤 Personal COFCO</h1><p>Pasajeros para el cronograma</p></div>
-      <button class="btn btn-red" onclick="abrirModalPersona(null,'personal')">+ Nuevo</button>
-    </div>
-    <div class="card" style="padding:0;overflow:hidden">
-      <table>
-        <thead><tr style="background:#1a1a2e;color:#fff"><th>Apellido y Nombre</th><th>Sector</th><th>Estado</th><th>Acciones</th></tr></thead>
-        <tbody id="per-tbody"></tbody>
-      </table>
+<!-- CONFIRM FINALIZAR -->
+<div class="confirm-ov" id="confirmModal">
+  <div class="confirm-box">
+    <div class="confirm-ttl" id="confTitle">¿Finalizar período?</div>
+    <div class="confirm-txt" id="confText">El período quedará cerrado y se creará uno nuevo automáticamente.</div>
+    <div style="display:flex;gap:10px;justify-content:center">
+      <button class="btn btn-outline" onclick="closeM('confirmModal')">Cancelar</button>
+      <button class="btn btn-danger" onclick="finalizarPeriodo()">🔒 Finalizar</button>
     </div>
   </div>
-  <div id="cho-modal" style="display:none"></div>
 </div>
 
-</div><!-- /main -->
-</div><!-- /app -->
+<!-- MODAL DIA RECORRIDOS -->
+<div class="modal-ov" id="dayModal">
+  <div class="modal" style="max-width:760px"><div id="dayModalBody"></div></div>
+</div>
+
+<!-- MODAL CHOFERES -->
+<div class="modal-ov" id="choferModal">
+  <div class="modal" style="max-width:700px"><div id="choferModalBody"></div></div>
+</div>
+
+<div class="toast" id="toast">✓</div>
 
 <script>
-// ── DATOS INICIALES DEL EXCEL ─────────────────────────────────────────────────
-var DATOS_EXCEL = [{"fecha": "2026-02-25", "chofer": "BOLADO", "hor": "18:00", "det": "RETIRA VENCHE DANIEL", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-02-25", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN Y TORO HECTOR", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-02-26", "chofer": "YANNIBELLI", "hor": "16:00", "det": "TRASLADO DE MARIANO BELLADA DESDE JUNIN AL HOTEL HORIZONTE DE SAN LORENZO", "cx": 0, "tipo": "AUTO", "km": 468.0, "hb": 0, "importe": 232698.96, "total": 232698.96}, {"fecha": "2026-02-26", "chofer": "BOLADO", "hor": "18:00", "det": "RETIRA VENCHE DANIEL", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-02-26", "chofer": "REINA", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN, ARGUELLO, HAILANT SEBASTIAN, ZALAZAR ESTEBAN, RETAMOZO JONA, MACHELLO AGUSTIN, TORO HECTOR, RAGUZA MAXIMO Y FERREYRA SAMUEL", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-02-27", "chofer": "MUGNOLO", "hor": "16:00", "det": "TRASLADO DE PLANTA TIMBUES A JUNIN AL OPERARIO MARIANO BELLADA", "cx": 0, "tipo": "AUTO", "km": 484.0, "hb": 0, "importe": 240654.48, "total": 240654.48}, {"fecha": "2026-02-27", "chofer": "GONZALEZ", "hor": "20:00", "det": "RETIRA TORO HECTOR, FERREYRA SAMUEL, RAGUZA MAXIMO, MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-02-28", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA YASMIN RECALT, VERA THIAGO Y LUCARENA ULISES", "cx": 11293.46, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 32992.04}, {"fecha": "2026-02-28", "chofer": "GONZALEZ", "hor": "20:00", "det": "RETIRA TORO HECTOR, FERREYRA SAMUEL, FIGGINI CRISTIAN, MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-01", "chofer": "REINA", "hor": "10:00", "det": "RETIRA YAZMIN RECALT", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-02", "chofer": "LORONI", "hor": "04:30", "det": "TRASLADO DE GUADALUPE LESCANO DESDE JUNIN AL PGSM", "cx": 0, "tipo": "AUTO", "km": 476.0, "hb": 0, "importe": 236676.72, "total": 236676.72}, {"fecha": "2026-03-02", "chofer": "GONZALEZ", "hor": "09:00", "det": "RETIRA LUGLI JUAN", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-02", "chofer": "GONZALEZ", "hor": "18:00", "det": "INGRESA GONZALEZ MATIAS - RETIRA VIALE WALDO", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-03-02", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA TORO HECTOR Y MACHELLO AGUSTIN", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-03-03", "chofer": "PESOINBOURE", "hor": "07:30", "det": "TRASLADO DESDE JUNIN A BALCARCE AL OPERARIO DIEGO RODRIGUEZ TERRONES", "cx": 0, "tipo": "AUTO", "km": 980.0, "hb": 0, "importe": 487275.6, "total": 487275.6}, {"fecha": "2026-03-03", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA GONZALEZ MATIAS", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-03", "chofer": "REINA", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN, TORO HECTOR, MACHELLO AGUSTIN, FERREYRA SAMUEL Y HISSIRIBEHERE GIANFRANCO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-04", "chofer": "BOLADO", "hor": "15:00", "det": "RETIRA VIALE WALDO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-04", "chofer": "GONZALEZ", "hor": "18:00", "det": "RETIRA HISSIRIBEHERE GIANFRANCO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-04", "chofer": "GONZALEZ", "hor": "20:00", "det": "RETIRA RAGUZA MAXIMO, TORO HECTOR Y FERREYRA SAMUEL", "cx": 11293.46, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 32992.04}, {"fecha": "2026-03-05", "chofer": "YEBER", "hor": "12:30", "det": "TRASLADO DESDE VILLEGAS A JUNIN AL OPERARIO RODRIGUEZ TERRONES DIEGO", "cx": 0, "tipo": "AUTO", "km": 412.0, "hb": 0, "importe": 204854.64, "total": 204854.64}, {"fecha": "2026-03-05", "chofer": "REINA", "hor": "18:00", "det": "INGRESA HISSIRIBEHERE GIANFRANCO - RETIRA BEVILACKUA BENJAMIN, FERREYRA SAMUEL, ZALAZAR BRUNO Y MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-05", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN, RAGUZA MAXIMO Y TORO HECTOR", "cx": 11293.46, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 32992.04}, {"fecha": "2026-03-06", "chofer": "TOLEDO", "hor": "08:30", "det": "TRASLADOS DE LOS OPERARIOS VAZQUE ALEXIS Y ALTAMIRANO LEONARDO DESDE JUNIN A SAN NICOLAS - CON ESPERA", "cx": 0, "tipo": "AUTO", "km": 330.0, "hb": 9.0, "importe": 198360.0, "total": 198360.0}, {"fecha": "2026-03-06", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA SANCHEZ DIEGO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-06", "chofer": "GONZALEZ", "hor": "18:00", "det": "RETIRA RAGUZA MAXIMO, HISSIRIBEHERE GIANFRANCO, TORO HECTOR, FIGGINI CRISTIAN, ZALAZAR BRUNO Y VUGLIOTTI WALTER", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-06", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA FERREYRA SAMUEL", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-07", "chofer": "REINA", "hor": "10:00", "det": "RETIRA LUCARENA ULISES, VERA THIAGO, MELVIHILL Y PALOMINO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-07", "chofer": "BOLADO", "hor": "18:00", "det": "INGRESA ROZUADONSQUEY CLARA - RETIRA ROMERO MARIA", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-03-07", "chofer": "REINA", "hor": "20:00", "det": "RETIRA RAGUZA MAXIMO, ZALAZAR BRUNO, FERREYRA SAMUEL, TORO HECTOR Y MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-08", "chofer": "BOLADO", "hor": "02:00", "det": "RETIRA CLARA ROZUADONSQUEY", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-08", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA SANCHEZ DIEGO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-08", "chofer": "BOLADO", "hor": "18:00", "det": "RETIRA TALLARICO NICOLAS", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-09", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA SANCHEZ DIEGO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-09", "chofer": "REINA", "hor": "19:00", "det": "INGRESA TORO HECTOR", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-10", "chofer": "MEDINA", "hor": "05:00", "det": "TRASLADO DESDE JUNIN A TIMBUES A LA OPERARIO IGLESIAS GISELA - CON ESPERA", "cx": 0, "tipo": "AUTO", "km": 484.0, "hb": 8.0, "importe": 271123.28, "total": 271123.28}, {"fecha": "2026-03-10", "chofer": "REINA", "hor": "18:00", "det": "INGRESA TORO HECTOR", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-10", "chofer": "BARRERA", "hor": "20:00", "det": "RETIRA RAGUSA MAXIMO, MACHELLO AGUSTIN, HAILANT SEBASTIAN, CERUNDULO DAVID, ARGUELLO FRANCO, OREJON FRANCO, MONSON NICOLAS Y RODRIGUEZ RENSO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-11", "chofer": "BARRERA", "hor": "02:00", "det": "INGRESA MONZON ELIO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-11", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA AGUIRRE RAMON", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-11", "chofer": "BOLADO", "hor": "18:00", "det": "INGRESA TORO HECTOR", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-11", "chofer": "BARRERA", "hor": "20:00", "det": "RETIRA PALOMERO BAUTISTA, BEVILACKUA BENJAMIN, FERREYRA SAMUEL Y OREJON FRANCO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}];
+// ══════════════════════════════════════════════════════════
+// VIAJES / PERÍODOS
+// ══════════════════════════════════════════════════════════
+const SK = 'cnt_v5';
+let S = loadS();
+let curId = S.cur;
+let searchQ = '';
 
-// ── STORAGE ───────────────────────────────────────────────────────────────────
-var DB={
-  load:function(k){try{return JSON.parse(localStorage.getItem('cofco_'+k)||'null')}catch(e){return null}},
-  save:function(k,v){try{localStorage.setItem('cofco_'+k,JSON.stringify(v))}catch(e){alert('Error guardando: '+e.message)}}
-};
+function loadS(){try{const s=JSON.parse(localStorage.getItem(SK));if(s&&s.periods)return s;}catch(e){}return initS();}
+function initS(){const id='p'+Date.now();const now=new Date();return{cur:id,periods:[{id,name:monthName(now),created:today(),closed:null,rows:[],t:{km:497.22,esp:3808.60,auto:21698.58,combi:43397.16}}]};}
+function monthName(d){return d.toLocaleString('es-AR',{month:'long',year:'numeric'}).toUpperCase();}
+function today(){return new Date().toISOString().split('T')[0];}
+function save(){localStorage.setItem(SK,JSON.stringify(S));}
+function curP(){return S.periods.find(p=>p.id===curId);}
 
-// ── STATE ─────────────────────────────────────────────────────────────────────
-var S={
-  recMes:new Date().getMonth(), recAnio:new Date().getFullYear(),
-  extMes:new Date().getMonth(), extAnio:new Date().getFullYear(),
-  cronMes:new Date().getMonth(),cronAnio:new Date().getFullYear(),
-  liqMes:new Date().getMonth(), liqAnio:new Date().getFullYear(),
-  cronTipo:'chofer', liqExp:null
-};
+function nuevoPeriodo(){const prev=curP();const t=prev?{...prev.t}:{km:497.22,esp:3808.60,auto:21698.58,combi:43397.16};const id='p'+Date.now();S.periods.unshift({id,name:monthName(new Date()),created:today(),closed:null,rows:[],t});S.cur=id;curId=id;save();renderAll();toast('Nuevo período creado ✓','ok');}
+function switchP(id){curId=id;renderAll();closeM('periodsModal');}
+function renameP(id){const p=S.periods.find(x=>x.id===id);if(!p)return;const n=prompt('Nuevo nombre:',p.name);if(n&&n.trim()){p.name=n.trim().toUpperCase();save();renderAll();renderPList();}}
+function deleteP(id){if(S.periods.length<=1){toast('No se puede eliminar el único período','err');return;}if(!confirm('¿Eliminar este período?'))return;S.periods=S.periods.filter(p=>p.id!==id);if(curId===id)curId=S.periods[0].id;if(S.cur===id)S.cur=S.periods[0].id;save();renderAll();renderPList();}
+function finalizarPeriodo(){const p=curP();if(!p)return;p.closed=today();closeM('confirmModal');nuevoPeriodo();toast('Período finalizado ✓','ok');}
+function confirmFinalizar(){const p=curP();if(!p)return;if(p.closed){toast('Ya está cerrado','err');return;}document.getElementById('confTitle').textContent=`¿Finalizar "${p.name}"?`;openM('confirmModal');}
 
-var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
-var DSEM=['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
-var ESTADOS=['T','F','G','VAC','LIC'];
-var cronMat={};
+function newRow(){return{id:'r'+Date.now()+'_'+Math.random().toString(36).slice(2,5),fecha:today(),chofer:'',horario:'',detalle:'',costoExt:'',tipo:'AUTO',km:'',hbEsp:'',imp:'',impTot:'',kmV:'',espV:''};}
+function addRow(){const p=curP();if(!p||p.closed){toast('Período cerrado','err');return;}p.rows.push(newRow());save();renderTable();updateStats();setTimeout(()=>{const tb=document.getElementById('tbody');if(tb.lastChild)tb.lastChild.scrollIntoView({behavior:'smooth',block:'nearest'});},50);}
+function delRow(id){const p=curP();if(!p||p.closed)return;p.rows=p.rows.filter(r=>r.id!==id);save();renderTable();updateStats();}
 
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6)}
-function fmtP(n){return '$'+Number(n||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}
-function mesKey(m,a){return a+'-'+(m<9?'0'+(m+1):(m+1))}
-function diasMes(m,a){return new Date(a,m+1,0).getDate()}
-function mesStr(m,a){return MESES[m]+' '+a}
+function upd(id,f,v){const p=curP();if(!p)return;const r=p.rows.find(x=>x.id===id);if(!r)return;r[f]=v;if(['tipo','km','hbEsp','costoExt'].includes(f))calcRow(r,p.t);save();updateStats();}
 
-// ── DATA ──────────────────────────────────────────────────────────────────────
-function getChos(){return DB.load('choferes')||[
-  {id:'c1',ap:'GONZALEZ',nom:'ALICIO',tipo:'combi',activo:true},
-  {id:'c2',ap:'REINA',nom:'SEBASTIAN',tipo:'combi',activo:true},
-  {id:'c3',ap:'BOLADO',nom:'JOSE',tipo:'auto',activo:true},
-  {id:'c4',ap:'BARRERA',nom:'MARCELO',tipo:'combi',activo:true},
-  {id:'c5',ap:'YANNIBELLI',nom:'',tipo:'auto',activo:true},
-  {id:'c6',ap:'MUGNOLO',nom:'',tipo:'auto',activo:true},
-  {id:'c7',ap:'LORONI',nom:'',tipo:'auto',activo:true},
-  {id:'c8',ap:'PESOINBOURE',nom:'',tipo:'auto',activo:true},
-  {id:'c9',ap:'YEBER',nom:'',tipo:'auto',activo:true},
-  {id:'c10',ap:'TOLEDO',nom:'',tipo:'auto',activo:true},
-  {id:'c11',ap:'MEDINA',nom:'',tipo:'auto',activo:true}
-]}
-function getPers(){return DB.load('personal')||[]}
-function getTar(){return DB.load('tarifas')||{km:497.22,esp:5805.20,auto:21698.58,combi:43397.16}}
-function getExt(){return DB.load('extras')||[]}
-function getRecs(){return DB.load('recorridos')||[]}
-function getCron(){return DB.load('cronograma')||{}}
-function getPeriodos(){return DB.load('periodos')||[]}
-
-function calcImp(e,t){return (e.tipo==='COMBI'?t.combi:t.auto)+(e.km||0)*t.km+(e.hb||0)*t.esp}
-
-// ── IMPORTAR EXCEL AL INICIAR ─────────────────────────────────────────────────
-function importarDatosExcel(){
-  if(DB.load('excel_importado')) return; // ya importado
-  var exts = getExt();
-  var t = getTar();
-  DATOS_EXCEL.forEach(function(r){
-    var anio = parseInt(r.fecha.split('-')[0]);
-    var mes  = parseInt(r.fecha.split('-')[1])-1;
-    exts.push({
-      id: uid(),
-      m: mes, a: anio,
-      fecha: r.fecha,
-      chId: '', chNom: r.chofer,
-      hor: r.hor,
-      det: r.det,
-      tipo: r.tipo === 'COMBI' ? 'COMBI' : 'AUTO',
-      cx: r.cx||0,
-      km: r.km||0,
-      hb: r.hb||0
-    });
-  });
-  DB.save('extras', exts);
-  DB.save('excel_importado', true);
+function calcRow(r,t){
+  const km=parseFloat(r.km)||0;
+  const hb=parseFloat(r.hbEsp)||0;   // horas de espera facturadas AL CLIENTE
+  const ce=parseFloat(r.costoExt)||0;
+  const base=r.tipo==='COMBI'?(t.combi||43397.16):(t.auto||21698.58);
+  const kmV=km*(t.km||497.22);
+  const espV=hb*(t.esp||3808.60);    // costo de espera para el CLIENTE
+  r.kmV=kmV>0?f2(kmV):'';
+  r.espV=espV>0?f2(espV):'';
+  if(km>0){r.imp=f2(kmV+espV);r.impTot=f2(kmV+espV+ce);}
+  else{r.imp=f2(base+espV);r.impTot=f2(base+espV+ce);}
 }
 
-// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
-function showPage(p){
-  document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active')});
-  document.querySelectorAll('.sb-item').forEach(function(el){el.classList.remove('active')});
-  document.getElementById('page-'+p).classList.add('active');
-  var ord=['recorridos','extras','cronograma','liquidacion','choferes'];
-  document.querySelectorAll('.sb-item')[ord.indexOf(p)].classList.add('active');
-  ({recorridos:renderRec,extras:renderExt,cronograma:renderCron,liquidacion:renderLiq,choferes:renderChos})[p]();
-}
-function cambiarMes(d,mod){
-  var mk=mod+'Mes',ak=mod+'Anio';
-  S[mk]+=d;
-  if(S[mk]>11){S[mk]=0;S[ak]++}
-  if(S[mk]<0){S[mk]=11;S[ak]--}
-  ({rec:renderRec,ext:renderExt,cron:renderCron,liq:renderLiq})[mod]();
-}
+function recalcAll(){const p=curP();if(!p)return;saveTarifas(p);p.rows.forEach(r=>calcRow(r,p.t));save();renderTable();updateStats();}
+function saveTarifas(p){if(!p.t)p.t={};p.t.km=parseFloat(document.getElementById('tKm').value)||497.22;p.t.esp=parseFloat(document.getElementById('tEsp').value)||3808.60;p.t.auto=parseFloat(document.getElementById('tAuto').value)||21698.58;p.t.combi=parseFloat(document.getElementById('tCombi').value)||43397.16;}
+function updRec(id){const p=curP();if(!p)return;const r=p.rows.find(x=>x.id===id);if(!r)return;calcRow(r,p.t);save();renderRow(id);updateStats();}
 
-// ── RECORRIDOS ────────────────────────────────────────────────────────────────
-function renderRec(){
-  var m=S.recMes,a=S.recAnio;
-  document.getElementById('rec-mes-label').textContent=mesStr(m,a).toUpperCase();
-  var recs=getRecs().filter(function(r){return r.m===m&&r.a===a});
-  var nd=diasMes(m,a),html='';
-  for(var d=1;d<=nd;d++){
-    var fe=new Date(a,m,d),dw=fe.getDay();
-    var rd=recs.filter(function(r){return r.d===d});
-    html+='<div class="dia-card'+(dw===0||dw===6?' fs':'')+'" onclick="abrirDia('+d+')">';
-    html+='<div style="display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #c0392b;padding-bottom:5px;margin-bottom:8px">';
-    html+='<span style="font-weight:900;font-size:14px">'+DSEM[dw]+' '+d+'</span>';
-    html+='<span style="font-size:10px;color:#bbb">'+(rd.length?rd.length+' chofer'+(rd.length>1?'s':''):'')+'</span></div>';
-    if(!rd.length){html+='<div style="color:#ddd;font-size:11px;text-align:center;padding:8px 0">+ Agregar</div>'}
-    else rd.forEach(function(r){
-      var ch=getChos().find(function(c){return c.id===r.cid});
-      html+='<div style="background:#1a1a2e;border-radius:5px;padding:7px 9px;margin-bottom:5px">';
-      html+='<div style="color:#c0392b;font-weight:800;font-size:12px;margin-bottom:4px">'+(ch?ch.ap:'?')+(r.franco?' <span style="background:#fff3cd;color:#856404;padding:1px 6px;border-radius:8px;font-size:10px">FRANCO</span>':'')+'</div>';
-      if(!r.franco&&r.turnos)r.turnos.forEach(function(t){
-        html+='<div style="color:rgba(255,255,255,0.82);font-size:11px">'+t.hi+' → '+t.hf+(t.det?' <span style="color:rgba(255,255,255,0.45);font-style:italic">· '+t.det+'</span>':'')+'</div>';
-      });
-      html+='</div>';
-    });
-    html+='</div>';
+function renderAll(){renderPeriodBar();renderTarifas();renderTable();updateStats();}
+function renderPeriodBar(){const p=curP();if(!p)return;document.getElementById('pName').textContent=p.name;const badge=document.getElementById('pBadge');badge.textContent=p.closed?'CERRADO':'ABIERTO';badge.className='period-badge'+(p.closed?' closed':'');document.getElementById('pDates').textContent=p.closed?`Creado: ${fd(p.created)} · Cerrado: ${fd(p.closed)}`:`Creado: ${fd(p.created)}`;}
+function renderTarifas(){const p=curP();if(!p||!p.t)return;document.getElementById('tKm').value=p.t.km??497.22;document.getElementById('tEsp').value=p.t.esp??3808.60;document.getElementById('tAuto').value=p.t.auto??21698.58;document.getElementById('tCombi').value=p.t.combi??43397.16;document.getElementById('thKm').textContent='KM $'+(p.t.km??497.22)+'/km';document.getElementById('thEsp').textContent='ESPERA $'+(p.t.esp??3808.60)+'/h';}
+
+function renderTable(){const p=curP();const tb=document.getElementById('tbody');if(!p){tb.innerHTML='';return;}const closed=!!p.closed;const q=searchQ.toLowerCase();const rows=q?p.rows.filter(r=>r.chofer.toLowerCase().includes(q)||r.detalle.toLowerCase().includes(q)):p.rows;document.getElementById('rowCount').textContent=rows.length+' registros';const dis=closed?'disabled':'';
+tb.innerHTML=rows.map((r,i)=>`<tr id="row_${r.id}">
+  <td class="td-c" style="color:var(--muted);font-size:11px">${i+1}</td>
+  <td><input class="ci mono" type="date" value="${r.fecha}" onchange="upd('${r.id}','fecha',this.value)" ${dis}></td>
+  <td><input class="ci" value="${esc(r.chofer)}" placeholder="Chofer" onchange="upd('${r.id}','chofer',this.value)" ${dis}></td>
+  <td><input class="ci mono" value="${esc(r.horario)}" placeholder="20:00" onchange="upd('${r.id}','horario',this.value)" ${dis}></td>
+  <td><input class="ci" value="${esc(r.detalle)}" placeholder="Detalle del viaje..." onchange="upd('${r.id}','detalle',this.value)" ${dis}></td>
+  <td><input class="ci mono td-r" style="text-align:right;color:var(--accent);font-weight:600" type="number" step="0.01" value="${r.costoExt}" placeholder="0" onchange="upd('${r.id}','costoExt',this.value);updRec('${r.id}')" ${dis}></td>
+  <td><select class="ci-sel" onchange="upd('${r.id}','tipo',this.value);updRec('${r.id}')" ${dis}><option value="AUTO" ${r.tipo==='AUTO'?'selected':''}>AUTO</option><option value="COMBI" ${r.tipo==='COMBI'?'selected':''}>COMBI</option></select></td>
+  <td><input class="ci mono" style="font-weight:600;color:var(--blue)" type="number" value="${r.km}" placeholder="0" onchange="upd('${r.id}','km',this.value);updRec('${r.id}')" ${dis}></td>
+  <td><input class="ci mono" style="font-weight:600;color:var(--yellow)" type="number" step="0.5" value="${r.hbEsp}" placeholder="0" onchange="upd('${r.id}','hbEsp',this.value);updRec('${r.id}')" ${dis}></td>
+  <td class="amt amt-importe td-r">${r.imp?'$'+fn(r.imp):'—'}</td>
+  <td class="amt amt-total td-r" style="font-weight:800">${r.impTot?'$'+fn(r.impTot):'—'}</td>
+  <td class="amt amt-km td-r">${r.kmV?'$'+fn(r.kmV):'—'}</td>
+  <td class="amt amt-esp td-r">${r.espV?'$'+fn(r.espV):'—'}</td>
+  <td class="td-c"><button class="del-btn" onclick="delRow('${r.id}')" title="Eliminar">🗑</button></td>
+</tr>`).join('');
+renderTotals(rows);}
+
+function renderRow(id){const p=curP();if(!p)return;const r=p.rows.find(x=>x.id===id);if(!r)return;const el=document.getElementById('row_'+id);if(!el)return;el.querySelector('td:nth-child(10)').innerHTML=r.imp?'$'+fn(r.imp):'—';el.querySelector('td:nth-child(11)').innerHTML=r.impTot?'$'+fn(r.impTot):'—';el.querySelector('td:nth-child(12)').innerHTML=r.kmV?'$'+fn(r.kmV):'—';el.querySelector('td:nth-child(13)').innerHTML=r.espV?'$'+fn(r.espV):'—';const q=searchQ.toLowerCase();const rows=q?p.rows.filter(r=>r.chofer.toLowerCase().includes(q)||r.detalle.toLowerCase().includes(q)):p.rows;renderTotals(rows);}
+
+function renderTotals(rows){const sm=f=>rows.reduce((s,r)=>s+(parseFloat(r[f])||0),0);const set=(id,v,fmt)=>document.getElementById(id).textContent=v?fmt(v):'';set('totCosto',sm('costoExt'),v=>'$'+fn(v));set('totKm',sm('km'),v=>fn(v)+' km');set('totHoras',sm('hbEsp'),v=>fn(v)+' h');set('totImp',sm('imp'),v=>'$'+fn(v));set('totTot',sm('impTot'),v=>'$'+fn(v));set('totKmV',sm('kmV'),v=>'$'+fn(v));set('totEspV',sm('espV'),v=>'$'+fn(v));}
+function updateStats(){const p=curP();if(!p)return;const sm=f=>p.rows.reduce((s,r)=>s+(parseFloat(r[f])||0),0);document.getElementById('sViajes').textContent=p.rows.length;document.getElementById('sKm').textContent=fn(sm('km'));document.getElementById('sHoras').textContent=fn(sm('hbEsp'));document.getElementById('sCosto').textContent='$'+fn(sm('costoExt'));document.getElementById('sTotal').textContent='$'+fn(sm('impTot'));}
+function filterTable(q){searchQ=q;renderTable();}
+
+function renderPList(){document.getElementById('pList').innerHTML=S.periods.map(p=>`<div class="p-item ${p.id===curId?'cur':''}"><div style="flex:1;cursor:pointer" onclick="switchP('${p.id}')"><div class="p-item-name">${p.name}</div><div class="p-item-meta">${p.rows.length} registros · ${fd(p.created)}${p.closed?' · Cerrado: '+fd(p.closed):' · <span style=color:#16a34a>ABIERTO</span>'}</div></div><div style="display:flex;gap:5px"><button class="btn btn-outline btn-sm" onclick="renameP('${p.id}')">✏</button><button class="btn btn-blue btn-sm" onclick="switchP('${p.id}');exportExcel()">⬇</button><button class="btn btn-danger btn-sm" onclick="deleteP('${p.id}')">🗑</button></div></div>`).join('');}
+function openPeriodsModal(){renderPList();openM('periodsModal');}
+
+function exportExcel(){const p=curP();if(!p)return;const wb=XLSX.utils.book_new();const enc=[['CHACABUCO NOROESTE TOUR S.R.L'],[`PERÍODO: ${p.name}`],[`Exportado: ${new Date().toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit',year:'numeric'})}`],[`Tarifa KM: $${p.t?.km??497.22}  /  Tarifa Espera (cliente): $${p.t?.esp??3808.60}/h  /  Base AUTO: $${p.t?.auto??21698.58}  /  Base COMBI: $${p.t?.combi??43397.16}`],[],['FECHA','CHOFER','HORARIO','DETALLE','COSTO EXT. PASAJE','TIPO','KM','HB ESPERA (cliente)','IMPORTE','IMPORTE TOT',`KM ($${p.t?.km??497.22}/km)`,`ESPERA ($${p.t?.esp??3808.60}/h)`]];const data=p.rows.map(r=>[r.fecha,r.chofer,r.horario,r.detalle,parseFloat(r.costoExt)||0,r.tipo,parseFloat(r.km)||0,parseFloat(r.hbEsp)||0,parseFloat(r.imp)||0,parseFloat(r.impTot)||0,parseFloat(r.kmV)||0,parseFloat(r.espV)||0]);const sm=f=>p.rows.reduce((s,r)=>s+(parseFloat(r[f])||0),0);const tots=['TOTALES','','','',sm('costoExt'),'',sm('km'),sm('hbEsp'),sm('imp'),sm('impTot'),sm('kmV'),sm('espV')];const ws=XLSX.utils.aoa_to_sheet([...enc,...data,[],tots]);ws['!cols']=[{wch:12},{wch:18},{wch:10},{wch:45},{wch:16},{wch:8},{wch:8},{wch:12},{wch:14},{wch:14},{wch:14},{wch:14}];ws['!merges']=[{s:{r:0,c:0},e:{r:0,c:11}},{s:{r:1,c:0},e:{r:1,c:11}},{s:{r:2,c:0},e:{r:2,c:11}},{s:{r:3,c:0},e:{r:3,c:11}}];XLSX.utils.book_append_sheet(wb,ws,p.name.substring(0,31));XLSX.writeFile(wb,`CNT_${p.name.replace(/[^a-zA-Z0-9]/g,'_')}_${today()}.xlsx`);toast('Excel exportado ✓','ok');}
+
+// ══════════════════════════════════════════════════════════
+// RECORRIDOS
+// ══════════════════════════════════════════════════════════
+const SK_R='cnt_recorridos_v1';
+let recState=loadRecState();
+let currentDayStr=null;
+
+function loadRecState(){try{const s=JSON.parse(localStorage.getItem(SK_R));if(s&&s.choferes)return s;}catch(e){}return initRecState();}
+function initRecState(){const now=new Date();return{choferes:['GONZALEZ ALICIO','REINA SEBASTIAN','BARRERA FERNANDO','BOLADO JOSE'],valorHora:5805.20,viewYear:now.getFullYear(),viewMonth:now.getMonth(),days:{},templates:initTemplates()};}
+function initTemplates(){return{lunes:{choferes:{}},martes:{choferes:{}},miercoles:{choferes:{}},jueves:{choferes:{}},viernes:{choferes:{}},sabado:{choferes:{}},domingo:{choferes:{}}};}
+function saveRec(){localStorage.setItem(SK_R,JSON.stringify(recState));}
+
+function getDayName(dateStr){const d=new Date(dateStr+'T12:00:00');return['domingo','lunes','martes','miercoles','jueves','viernes','sabado'][d.getDay()];}
+function getDayData(dateStr){if(!recState.days[dateStr]){const tpl=recState.templates[getDayName(dateStr)];recState.days[dateStr]=JSON.parse(JSON.stringify(tpl||{choferes:{}}));}return recState.days[dateStr];}
+function parseHours(desde,hasta){const toMin=t=>{const[h,m]=t.split(':').map(Number);return h*60+(m||0);};let d=toMin(desde),h=toMin(hasta);if(h<=d)h+=24*60;return Math.round((h-d)*10/60)/10;}
+function getAllChoferes(){const set=new Set(recState.choferes);Object.values(recState.days).forEach(day=>{Object.keys(day.choferes).forEach(c=>set.add(c));});return[...set];}
+
+function renderRecorridos(){
+  const year=recState.viewYear,month=recState.viewMonth;
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const firstDay=new Date(year,month,1).getDay();
+  const dim=new Date(year,month+1,0).getDate();
+  const tod=new Date().toISOString().split('T')[0];
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div class="month-nav">
+      <button class="btn btn-outline btn-sm" onclick="recPrevMonth()">‹</button>
+      <span class="month-title">${MN[month].toUpperCase()} ${year}</span>
+      <button class="btn btn-outline btn-sm" onclick="recNextMonth()">›</button>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-outline btn-sm" onclick="openChoferesMgr()">👤 Choferes</button>
+      <button class="btn btn-blue btn-sm" onclick="switchAppTab('liquidacion')">💰 Liquidación</button>
+    </div>
+  </div>
+  <div class="dow-headers">
+    <div class="dow-hdr dom">DOM</div><div class="dow-hdr">LUN</div><div class="dow-hdr">MAR</div>
+    <div class="dow-hdr">MIÉ</div><div class="dow-hdr">JUE</div><div class="dow-hdr vie">VIE</div><div class="dow-hdr sab">SÁB</div>
+  </div>
+  <div class="rec-calendar">`;
+  for(let i=0;i<firstDay;i++)html+=`<div class="rec-day-empty"></div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dn=getDayName(ds);
+    const dd=recState.days[ds]||{choferes:{}};
+    const isHoy=ds===tod;
+    const hdrCls=dn==='domingo'?'domingo':dn==='sabado'?'sabado':dn==='viernes'?'viernes':'';
+    const chs=Object.keys(dd.choferes);
+    const hasTurnos=chs.length>0;
+    html+=`<div class="rec-day-card" style="${isHoy?'box-shadow:0 0 0 3px var(--accent);':''}" onclick="openDayModal('${ds}')">
+      <div class="rec-day-header ${hdrCls}">
+        <span style="font-size:13px">${dn.substring(0,3).toUpperCase()} ${d}</span>
+        ${hasTurnos?`<span style="font-size:10px;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:10px">${chs.length} chof</span>`:'<span style="font-size:11px;opacity:.6">+</span>'}
+      </div>
+      ${hasTurnos?chs.map(c=>{const hs=Math.round((dd.choferes[c]||[]).reduce((s,t)=>s+parseHours(t.desde,t.hasta),0)*10)/10;return`<div style="padding:3px 8px;font-size:11px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between"><span style="font-weight:600">${c.split(' ')[0]}</span><span style="font-family:var(--font-mono);color:var(--accent)">${hs}h</span></div>`;}).join(''):`<div style="padding:12px;text-align:center;color:#d1d5db;font-size:22px">+</div>`}
+    </div>`;
   }
-  document.getElementById('rec-grid').innerHTML=html;
+  html+=`</div>`;
+  document.getElementById('app-recorridos').innerHTML=html;
 }
 
-function exportarRecJPG(){
-  var el=document.getElementById('rec-grid-wrap');
-  var lbl=document.getElementById('rec-mes-label').textContent;
-  html2canvas(el,{scale:2,backgroundColor:'#f4f4f7',useCORS:true}).then(function(canvas){
-    var a=document.createElement('a');
-    a.download='Recorridos_'+lbl.replace(/ /g,'_')+'.jpg';
-    a.href=canvas.toDataURL('image/jpeg',0.92);
-    a.click();
-  });
+function recPrevMonth(){recState.viewMonth--;if(recState.viewMonth<0){recState.viewMonth=11;recState.viewYear--;}renderRecorridos();}
+function recNextMonth(){recState.viewMonth++;if(recState.viewMonth>11){recState.viewMonth=0;recState.viewYear++;}renderRecorridos();}
+
+// ─── DAY MODAL ────────────────────────────────────────────
+function openDayModal(dateStr){
+  currentDayStr=dateStr;
+  if(!recState.days[dateStr])recState.days[dateStr]={choferes:{}};
+  renderDayModal();openM('dayModal');
 }
 
-function abrirDia(d){
-  var m=S.recMes,a=S.recAnio;
-  var recs=getRecs().filter(function(r){return r.m===m&&r.a===a&&r.d===d});
-  var chos=getChos().filter(function(c){return c.activo});
-  var fe=new Date(a,m,d);
-  var tit=DSEM[fe.getDay()]+' '+d+' de '+MESES[m]+' '+a;
-  var html='<div class="overlay" onclick="if(event.target===this)cerrarRec()">';
-  html+='<div class="modal"><div class="modal-top"><h2>'+tit+'</h2>';
-  html+='<div style="display:flex;gap:6px;align-items:center">';
-  if(d>1)html+='<button class="btn btn-blue" style="font-size:11px" onclick="copiarDia('+d+')">📋 Copiar día '+(d-1)+'</button>';
-  html+='<button onclick="cerrarRec()" style="background:none;border:none;font-size:22px;cursor:pointer">✕</button></div></div>';
-  html+='<div class="modal-body">';
-  recs.forEach(function(r){html+=bloqueChofer(r,chos.find(function(c){return c.id===r.cid}))});
-  var disp=chos.filter(function(c){return !recs.find(function(r){return r.cid===c.id})});
-  if(disp.length){
-    html+='<div style="display:flex;gap:8px;align-items:center;padding:10px;background:#f4f4f7;border-radius:6px">';
-    html+='<select id="sel-cho" style="flex:1"><option value="">— Agregar chofer al día —</option>';
-    disp.forEach(function(c){html+='<option value="'+c.id+'">'+c.ap+' '+c.nom+'</option>'});
-    html+='</select><button class="btn btn-green" onclick="addChoferDia('+d+')">+ Agregar</button></div>';
-  }
-  html+='</div></div></div>';
-  var modal=document.getElementById('rec-modal');
-  modal.innerHTML=html;modal.style.display='block';modal._d=d;
-}
+function renderDayModal(){
+  const dateStr=currentDayStr;
+  const day=recState.days[dateStr];
+  const d=new Date(dateStr+'T12:00:00');
+  const DN=['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const dayName=DN[d.getDay()],dayNum=d.getDate(),mName=MN[d.getMonth()];
+  const chs=Object.keys(day.choferes);
+  const logoEl=document.querySelector('.brand-logo');
+  const logoSrc=logoEl?logoEl.src:'';
 
-function bloqueChofer(r,ch){
-  var html='<div class="cho-bloque">';
-  html+='<div class="cho-bloque-header">';
-  html+='<span class="cho-bloque-nombre">'+(ch?ch.ap+' '+ch.nom:'?')+'</span>';
-  html+='<div style="display:flex;align-items:center;gap:8px">';
-  html+='<label style="font-size:11px;font-weight:600;cursor:pointer"><input type="checkbox"'+(r.franco?' checked':'')+' onchange="toggleFranco(\''+r.id+'\')"> Franco</label>';
-  html+='<button onclick="delRec(\''+r.id+'\')" style="background:none;border:none;cursor:pointer;font-size:16px;color:#c0392b">✖</button></div></div>';
-  if(!r.franco){
-    html+='<div id="turnos-'+r.id+'">';
-    (r.turnos||[]).forEach(function(t,i){
-      html+='<div class="turno-row">';
-      html+='<input type="time" value="'+t.hi+'" onchange="editT(\''+r.id+'\','+i+',\'hi\',this.value)" style="width:88px">';
-      html+='<span style="color:#ccc;font-size:14px">→</span>';
-      html+='<input type="time" value="'+t.hf+'" onchange="editT(\''+r.id+'\','+i+',\'hf\',this.value)" style="width:88px">';
-      html+='<input type="text" value="'+t.det+'" placeholder="Detalle..." onchange="editT(\''+r.id+'\','+i+',\'det\',this.value)" style="flex:1;min-width:80px">';
-      html+='<button onclick="delTurno(\''+r.id+'\','+i+')" style="background:none;border:none;cursor:pointer;color:#c0392b">🗑</button></div>';
-    });
-    html+='</div>';
-    html+='<button onclick="addTurno(\''+r.id+'\')" style="background:none;border:1.5px dashed #2980b9;color:#2980b9;border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer;margin-top:6px">+ Agregar turno</button>';
-    html+='<input type="text" value="'+(r.notas||'')+'" placeholder="Notas del día..." onchange="editNotas(\''+r.id+'\',this.value)" style="width:100%;margin-top:6px">';
-  }
-  html+='</div>';
-  return html;
-}
+  // Tarjeta imprimible
+  let card=`<div id="dayPrintCard" style="background:#fff;font-family:Arial,sans-serif;width:100%;border:2px solid #222">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-bottom:3px solid #c0392b">
+      ${logoSrc?`<img src="${logoSrc}" style="height:44px" alt="Logo" crossorigin="anonymous">`:`<div style="font-family:Arial;font-size:13px;font-weight:900">CNT SRL</div>`}
+      <div style="text-align:center;flex:1"><div style="font-size:20px;font-weight:900;letter-spacing:2px">TRASLADO PERSONAL · COFCO</div></div>
+      <div style="font-size:36px">🚌</div>
+    </div>`;
 
-function addChoferDia(d){var sel=document.getElementById('sel-cho');if(!sel||!sel.value)return;var recs=getRecs();recs.push({id:uid(),m:S.recMes,a:S.recAnio,d:d,cid:sel.value,turnos:[{hi:'',hf:'',det:''}],franco:false,notas:''});DB.save('recorridos',recs);abrirDia(d)}
-function addTurno(rid){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r){r.turnos=r.turnos||[];r.turnos.push({hi:'',hf:'',det:''})}DB.save('recorridos',recs);abrirDia(document.getElementById('rec-modal')._d)}
-function delTurno(rid,i){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r&&r.turnos)r.turnos.splice(i,1);DB.save('recorridos',recs);abrirDia(document.getElementById('rec-modal')._d)}
-function editT(rid,i,k,v){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r&&r.turnos&&r.turnos[i])r.turnos[i][k]=v;DB.save('recorridos',recs)}
-function editNotas(rid,v){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r)r.notas=v;DB.save('recorridos',recs)}
-function toggleFranco(rid){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r)r.franco=!r.franco;DB.save('recorridos',recs);abrirDia(document.getElementById('rec-modal')._d)}
-function delRec(rid){if(!confirm('¿Eliminar?'))return;DB.save('recorridos',getRecs().filter(function(r){return r.id!==rid}));abrirDia(document.getElementById('rec-modal')._d)}
-function copiarDia(d){var m=S.recMes,a=S.recAnio,recs=getRecs();var orig=recs.filter(function(r){return r.m===m&&r.a===a&&r.d===d-1});var filtrado=recs.filter(function(r){return !(r.m===m&&r.a===a&&r.d===d)});var nuevos=orig.map(function(r){return Object.assign({},r,{id:uid(),d:d,turnos:(r.turnos||[]).map(function(t){return Object.assign({},t)})})});DB.save('recorridos',filtrado.concat(nuevos));abrirDia(d)}
-function cerrarRec(){document.getElementById('rec-modal').style.display='none';renderRec()}
-
-// ── EXTRAS ────────────────────────────────────────────────────────────────────
-function renderExt(){
-  var m=S.extMes,a=S.extAnio;
-  document.getElementById('ext-mes-label').textContent=mesStr(m,a).toUpperCase();
-  var t=getTar();
-  document.getElementById('t-km').value=t.km;
-  document.getElementById('t-esp').value=t.esp;
-  document.getElementById('t-auto').value=t.auto;
-  document.getElementById('t-combi').value=t.combi;
-
-  // Períodos cerrados
-  var periodos=getPeriodos().filter(function(p){return p.anio===a&&p.mes===m});
-  var secP=document.getElementById('periodos-cerrados-sec');
-  var listaP=document.getElementById('periodos-lista');
-  if(periodos.length){
-    secP.style.display='block';
-    var ph='';
-    periodos.forEach(function(p){
-      ph+='<div class="periodo-cerrado">';
-      ph+='<div><div class="periodo-cerrado-label">🔒 '+p.label+'</div>';
-      ph+='<div class="periodo-cerrado-info">'+p.registros+' registros · Total: '+fmtP(p.total)+' · Cerrado el '+p.fechaCierre+'</div></div>';
-      ph+='<button class="btn btn-green" onclick="exportarPeriodoExcel(\''+p.id+'\')">📥 Excel</button></div>';
-    });
-    listaP.innerHTML=ph;
+  if(!chs.length){
+    card+=`<div style="padding:28px;text-align:center;color:#9ca3af;font-size:13px">Sin turnos cargados. Usá el botón + para agregar.</div>`;
   } else {
-    secP.style.display='none';
-  }
-
-  // Filtrar extras NO cerrados del mes actual
-  var cerradosIds=[];
-  getPeriodos().filter(function(p){return p.anio===a&&p.mes===m}).forEach(function(p){cerradosIds=cerradosIds.concat(p.extIds||[])});
-
-  var bus=(document.getElementById('ext-busqueda').value||'').toLowerCase();
-  var exts=getExt().filter(function(e){
-    return e.m===m&&e.a===a&&cerradosIds.indexOf(e.id)<0&&
-      (!bus||(e.chNom||'').toLowerCase().includes(bus)||(e.det||'').toLowerCase().includes(bus));
-  });
-
-  document.getElementById('ext-count').textContent=exts.length+' registros abiertos';
-  var tot={v:0,km:0,esp:0,cx:0,tot:0};
-  exts.forEach(function(e){tot.v++;tot.km+=(e.km||0);tot.esp+=(e.hb||0);tot.cx+=(e.cx||0);tot.tot+=calcImp(e,t)+(e.cx||0)});
-  document.getElementById('ext-kpis').innerHTML=
-    '<div class="kpi"><div class="kpi-val">'+tot.v+'</div><div class="kpi-lbl">Viajes</div></div>'+
-    '<div class="kpi azul"><div class="kpi-val">'+tot.km.toFixed(0)+'</div><div class="kpi-lbl">KM Total</div></div>'+
-    '<div class="kpi naranja"><div class="kpi-val">'+tot.esp.toFixed(1)+'</div><div class="kpi-lbl">Hs Espera</div></div>'+
-    '<div class="kpi rojo"><div class="kpi-val">'+fmtP(tot.cx)+'</div><div class="kpi-lbl">Costo Ext. Pasaje</div></div>'+
-    '<div class="kpi verde"><div class="kpi-val">'+fmtP(tot.tot)+'</div><div class="kpi-lbl">Total General</div></div>';
-
-  var html='';
-  exts.forEach(function(e,i){
-    var imp=calcImp(e,t),tot2=imp+(e.cx||0);
-    html+='<tr style="border-bottom:1px solid #eee;background:'+(i%2?'#fff':'#fafafa')+'">';
-    html+='<td style="color:#bbb">'+(i+1)+'</td>';
-    html+='<td>'+e.fecha+'</td>';
-    html+='<td style="font-weight:700;color:#c0392b">'+(e.chNom||'')+'</td>';
-    html+='<td>'+e.hor+'</td>';
-    html+='<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#444">'+e.det+'</td>';
-    html+='<td style="color:'+(e.cx>0?'#c0392b':'#bbb')+'">'+(e.cx>0?fmtP(e.cx):'—')+'</td>';
-    html+='<td><span style="background:'+(e.tipo==='COMBI'?'#dcfce7':'#dbeafe')+';color:'+(e.tipo==='COMBI'?'#166534':'#1e40af')+';padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700">'+e.tipo+'</span></td>';
-    html+='<td>'+(e.km>0?e.km:'—')+'</td>';
-    html+='<td>'+(e.hb>0?e.hb:'—')+'</td>';
-    html+='<td style="color:#2980b9;font-weight:700">'+fmtP(imp)+'</td>';
-    html+='<td style="color:#27ae60;font-weight:700">'+fmtP(tot2)+'</td>';
-    html+='<td><button onclick="editExt(\''+e.id+'\')" style="background:none;border:none;cursor:pointer">✏️</button><button onclick="delExt(\''+e.id+'\')" style="background:none;border:none;cursor:pointer">🗑</button></td></tr>';
-  });
-  document.getElementById('ext-tbody').innerHTML=html;
-}
-
-function saveTarifa(){
-  DB.save('tarifas',{km:parseFloat(document.getElementById('t-km').value)||0,esp:parseFloat(document.getElementById('t-esp').value)||0,auto:parseFloat(document.getElementById('t-auto').value)||0,combi:parseFloat(document.getElementById('t-combi').value)||0});
-  renderExt();
-}
-
-function abrirNuevoExtra(){abrirModalExt(null)}
-function editExt(id){var e=getExt().find(function(x){return x.id===id});if(e)abrirModalExt(e)}
-
-function abrirModalExt(e){
-  var chos=getChos().filter(function(c){return c.activo});
-  var html='<div class="overlay" onclick="if(event.target===this)cerrarExt()">';
-  html+='<div class="modal"><div class="modal-top"><h2>'+(e?'Editar registro':'Nuevo registro')+'</h2>';
-  html+='<button onclick="cerrarExt()" style="background:none;border:none;font-size:22px;cursor:pointer">✕</button></div>';
-  html+='<div class="modal-body">';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-  html+='<label style="font-size:11px;font-weight:700">FECHA<br><input type="date" id="ef-fecha" value="'+(e?e.fecha:'')+'" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">HORARIO<br><input type="time" id="ef-hor" value="'+(e?e.hor:'')+'" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">CHOFER<br><select id="ef-cho" style="width:100%"><option value="">— Seleccionar —</option>';
-  chos.forEach(function(c){html+='<option value="'+c.id+'"'+(e&&e.chId===c.id?' selected':'')+'>'+c.ap+' '+c.nom+'</option>'});
-  html+='<option value="_manual"'+(e&&!e.chId?' selected':'')+'>✏️ Escribir nombre</option>';
-  html+='</select></label>';
-  html+='<label style="font-size:11px;font-weight:700">TIPO<br><select id="ef-tipo" style="width:100%"><option value="AUTO"'+(e&&e.tipo==='AUTO'?' selected':'')+'>AUTO</option><option value="COMBI"'+(e&&e.tipo==='COMBI'?' selected':'')+'>COMBI</option></select></label>';
-  html+='</div>';
-  html+='<div id="ef-cho-manual-wrap" style="display:'+(e&&!e.chId?'block':'none')+'">';
-  html+='<label style="font-size:11px;font-weight:700">NOMBRE CHOFER (manual)<br><input type="text" id="ef-cho-manual" value="'+(e&&!e.chId?e.chNom||'':'')+'" style="width:100%"></label></div>';
-  html+='<label style="font-size:11px;font-weight:700">DETALLE<br><input type="text" id="ef-det" value="'+(e?e.det:'')+'" placeholder="Descripción del viaje..." style="width:100%"></label>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
-  html+='<label style="font-size:11px;font-weight:700">COSTO EXT. PASAJE<br><input type="number" id="ef-cx" value="'+(e?e.cx:0)+'" step="0.01" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">KM<br><input type="number" id="ef-km" value="'+(e?e.km:0)+'" step="1" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">HS ESPERA<br><input type="number" id="ef-hb" value="'+(e?e.hb:0)+'" step="0.5" style="width:100%"></label>';
-  html+='</div>';
-  html+='<div style="display:flex;gap:8px;justify-content:flex-end">';
-  html+='<button class="btn btn-red" onclick="guardarExt(\''+(e?e.id:'')+'\')">💾 Guardar</button>';
-  html+='<button class="btn btn-gray" onclick="cerrarExt()">Cancelar</button></div>';
-  html+='</div></div></div>';
-  document.getElementById('ext-modal').innerHTML=html;
-  document.getElementById('ext-modal').style.display='block';
-  document.getElementById('ef-cho').addEventListener('change',function(){
-    document.getElementById('ef-cho-manual-wrap').style.display=this.value==='_manual'?'block':'none';
-  });
-}
-
-function guardarExt(id){
-  var chSel=document.getElementById('ef-cho').value;
-  var chId='',chNom='';
-  if(chSel==='_manual'){chNom=(document.getElementById('ef-cho-manual').value||'').toUpperCase()}
-  else if(chSel){var ch=getChos().find(function(c){return c.id===chSel});chId=chSel;chNom=ch?ch.ap:''}
-  else{return alert('Seleccionar chofer')}
-  if(!document.getElementById('ef-fecha').value||!document.getElementById('ef-det').value)return alert('Completar fecha y detalle');
-  var exts=getExt();
-  var fv=document.getElementById('ef-fecha').value;
-  var obj={id:id||uid(),
-    m:parseInt(fv.split('-')[1])-1,a:parseInt(fv.split('-')[0]),
-    fecha:fv,chId:chId,chNom:chNom,
-    hor:document.getElementById('ef-hor').value,
-    det:document.getElementById('ef-det').value,
-    tipo:document.getElementById('ef-tipo').value,
-    cx:parseFloat(document.getElementById('ef-cx').value)||0,
-    km:parseFloat(document.getElementById('ef-km').value)||0,
-    hb:parseFloat(document.getElementById('ef-hb').value)||0
-  };
-  if(id){var i=exts.findIndex(function(e){return e.id===id});if(i>=0)exts[i]=obj}else exts.push(obj);
-  DB.save('extras',exts);cerrarExt();
-}
-function delExt(id){if(!confirm('¿Eliminar?'))return;DB.save('extras',getExt().filter(function(e){return e.id!==id}));renderExt()}
-function cerrarExt(){document.getElementById('ext-modal').style.display='none';renderExt()}
-
-// ── CIERRE DE PERÍODO ─────────────────────────────────────────────────────────
-function abrirCierrePeriodo(){
-  var m=S.extMes,a=S.extAnio;
-  // Fechas límite del mes
-  var primerDia=a+'-'+String(m+1).padStart(2,'0')+'-01';
-  var ultimoDia=a+'-'+String(m+1).padStart(2,'0')+'-'+String(diasMes(m,a)).padStart(2,'0');
-
-  var html='<div class="overlay" onclick="if(event.target===this)this.parentNode.style.display=\'none\'">';
-  html+='<div class="modal"><div class="modal-top"><h2>🔒 Cerrar período</h2>';
-  html+='<button onclick="document.getElementById(\'cierre-modal\').style.display=\'none\'" style="background:none;border:none;font-size:22px;cursor:pointer">✕</button></div>';
-  html+='<div class="modal-body">';
-  html+='<p style="font-size:13px;color:#555">Seleccioná el rango de fechas a cerrar. Los registros de ese período quedarán <b>bloqueados</b> y podrás exportarlos a Excel.</p>';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
-  html+='<label style="font-size:11px;font-weight:700">FECHA DESDE<br><input type="date" id="cp-desde" value="'+primerDia+'" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">FECHA HASTA<br><input type="date" id="cp-hasta" value="'+ultimoDia+'" style="width:100%"></label>';
-  html+='</div>';
-  html+='<label style="font-size:11px;font-weight:700">NOMBRE DEL PERÍODO (ej: 1ra quincena marzo)<br><input type="text" id="cp-label" value="'+MESES[m]+' '+a+'" style="width:100%"></label>';
-  html+='<div id="cp-preview" style="background:#f4f4f7;border-radius:6px;padding:10px;font-size:12px;color:#555">Seleccioná las fechas para ver el preview</div>';
-  html+='<div style="display:flex;gap:8px;justify-content:flex-end">';
-  html+='<button class="btn btn-orange" onclick="previewCierre()">👁 Preview</button>';
-  html+='<button class="btn btn-red" onclick="confirmarCierre()">🔒 Confirmar cierre</button>';
-  html+='<button class="btn btn-gray" onclick="document.getElementById(\'cierre-modal\').style.display=\'none\'">Cancelar</button></div>';
-  html+='</div></div></div>';
-
-  var modal=document.getElementById('cierre-modal');
-  if(!modal){modal=document.createElement('div');modal.id='cierre-modal';document.body.appendChild(modal)}
-  modal.innerHTML=html;modal.style.display='block';
-}
-
-function getExtsPeriodo(){
-  var desde=document.getElementById('cp-desde').value;
-  var hasta=document.getElementById('cp-hasta').value;
-  return getExt().filter(function(e){return e.fecha>=desde&&e.fecha<=hasta});
-}
-
-function previewCierre(){
-  var exts=getExtsPeriodo();
-  var t=getTar();
-  var tot=exts.reduce(function(s,e){return s+calcImp(e,t)+(e.cx||0)},0);
-  document.getElementById('cp-preview').innerHTML=
-    '<b>'+exts.length+' registros</b> en el período · Total: <b style="color:#27ae60">'+fmtP(tot)+'</b>';
-}
-
-function confirmarCierre(){
-  var exts=getExtsPeriodo();
-  if(!exts.length)return alert('No hay registros en ese período');
-  if(!confirm('¿Cerrar este período? Los registros quedarán bloqueados.'))return;
-  var t=getTar();
-  var tot=exts.reduce(function(s,e){return s+calcImp(e,t)+(e.cx||0)},0);
-  var desde=document.getElementById('cp-desde').value;
-  var hasta=document.getElementById('cp-hasta').value;
-  var label=document.getElementById('cp-label').value||desde+' al '+hasta;
-  var hoy=new Date().toLocaleDateString('es-AR');
-  var periodos=getPeriodos();
-  var pid=uid();
-  periodos.push({
-    id:pid,
-    label:label,
-    desde:desde,hasta:hasta,
-    mes:parseInt(desde.split('-')[1])-1,
-    anio:parseInt(desde.split('-')[0]),
-    registros:exts.length,
-    total:tot,
-    fechaCierre:hoy,
-    extIds:exts.map(function(e){return e.id}),
-    snapshot:exts.map(function(e){return Object.assign({},e,{_imp:calcImp(e,t),_tot:calcImp(e,t)+(e.cx||0)})})
-  });
-  DB.save('periodos',periodos);
-  document.getElementById('cierre-modal').style.display='none';
-  alert('✅ Período "'+label+'" cerrado correctamente.');
-  renderExt();
-}
-
-function exportarPeriodoExcel(pid){
-  var p=getPeriodos().find(function(x){return x.id===pid});
-  if(!p)return;
-  var wb=XLSX.utils.book_new();
-  var cabecera=[['FECHA','CHOFER','HORARIO','DETALLE','COSTO EXT. POR PASAJERO','MOVIL','KM','HS ESPERA','IMPORTE','IMPORTE TOTAL']];
-  var filas=p.snapshot.map(function(e){return[
-    e.fecha, e.chNom||'', e.hor, e.det,
-    e.cx||0, e.tipo, e.km||0, e.hb||0,
-    e._imp, e._tot
-  ]});
-  // Fila de totales
-  var t=getTar();
-  var totales=[
-    '','','','TOTALES',
-    p.snapshot.reduce(function(s,e){return s+(e.cx||0)},0),'',
-    p.snapshot.reduce(function(s,e){return s+(e.km||0)},0),
-    p.snapshot.reduce(function(s,e){return s+(e.hb||0)},0),
-    p.snapshot.reduce(function(s,e){return s+e._imp},0),
-    p.total
-  ];
-  var data=cabecera.concat(filas).concat([totales]);
-  var ws=XLSX.utils.aoa_to_sheet(data);
-  // Anchos de columna
-  ws['!cols']=[{wch:12},{wch:16},{wch:10},{wch:60},{wch:18},{wch:8},{wch:8},{wch:10},{wch:14},{wch:14}];
-  XLSX.utils.book_append_sheet(wb,ws,'Extras');
-  // Hoja resumen
-  var resumen=[
-    ['PERÍODO',p.label],
-    ['DESDE',p.desde],['HASTA',p.hasta],
-    ['REGISTROS',p.registros],
-    ['TOTAL GENERAL',p.total],
-    ['FECHA DE CIERRE',p.fechaCierre],
-    ['',''],
-    ['TARIFAS VIGENTES',''],
-    ['$/KM',t.km],['$/H ESPERA',t.esp],
-    ['BASE AUTO',t.auto],['BASE COMBI',t.combi]
-  ];
-  var wsR=XLSX.utils.aoa_to_sheet(resumen);
-  wsR['!cols']=[{wch:20},{wch:20}];
-  XLSX.utils.book_append_sheet(wb,wsR,'Resumen');
-  XLSX.writeFile(wb,'COFCO_Extras_'+p.label.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx');
-}
-
-// ── CRONOGRAMA ────────────────────────────────────────────────────────────────
-function setCronTipo(t){
-  S.cronTipo=t;
-  document.getElementById('ct-chofer').className='tab-btn'+(t==='chofer'?' active':'');
-  document.getElementById('ct-personal').className='tab-btn'+(t==='personal'?' active':'');
-  renderCron();
-}
-var CRON_COL={T:'#d4edda',F:'#fff3cd',G:'#cce5ff',VAC:'#e2d9f3',LIC:'#f8d7da'};
-var CRON_TXT={T:'#155724',F:'#856404',G:'#004085',VAC:'#6f42c1',LIC:'#721c24'};
-
-function renderCron(){
-  var m=S.cronMes,a=S.cronAnio;
-  document.getElementById('cron-mes-label').textContent=mesStr(m,a).toUpperCase();
-  var nd=diasMes(m,a);
-  var personas=S.cronTipo==='chofer'?getChos().filter(function(c){return c.activo}):getPers().filter(function(p){return p.activo});
-  var cron=getCron(),key=S.cronTipo+'-'+mesKey(m,a);
-  cronMat={};
-  personas.forEach(function(p){
-    cronMat[p.id]={};
-    for(var d=1;d<=nd;d++)cronMat[p.id][d]='T';
-    if(cron[key]&&cron[key][p.id])Object.assign(cronMat[p.id],cron[key][p.id]);
-  });
-  var head='<tr><th style="background:#1a1a2e;color:#fff;padding:7px 10px;min-width:115px;position:sticky;left:0;z-index:2">Nombre</th>';
-  for(var d=1;d<=nd;d++){
-    var dw=new Date(a,m,d).getDay(),fs=dw===0||dw===6;
-    head+='<th style="background:'+(fs?'#3d1a1a':'#1a1a2e')+';color:rgba(255,255,255,0.8);padding:3px 1px;text-align:center;min-width:32px">';
-    head+='<div style="font-size:8px;opacity:0.6">'+['D','L','M','X','J','V','S'][dw]+'</div><div style="font-size:11px;font-weight:700">'+d+'</div></th>';
-  }
-  head+='<th style="background:#2c3e50;color:#fff;padding:6px 4px;text-align:center;font-size:10px;min-width:28px">T</th><th style="background:#2c3e50;color:#fff;padding:6px 4px;text-align:center;font-size:10px;min-width:28px">F</th><th style="background:#2c3e50;color:#fff;padding:6px 4px;text-align:center;font-size:10px;min-width:28px">VAC</th></tr>';
-  document.getElementById('cron-head').innerHTML=head;
-  var body='';
-  personas.forEach(function(p){
-    body+='<tr>';
-    body+='<td style="font-weight:700;font-size:11px;padding:5px 10px;background:#fff;position:sticky;left:0;z-index:1;border-right:2px solid #eee;white-space:nowrap">'+p.ap+(p.nom?' '+p.nom.charAt(0)+'.':'')+'</td>';
-    var cT=0,cF=0,cV=0;
-    for(var d=1;d<=nd;d++){
-      var est=cronMat[p.id][d]||'T';
-      if(est==='T')cT++;if(est==='F')cF++;if(est==='VAC')cV++;
-      body+='<td onclick="ciclar(\''+p.id+'\','+d+')" style="background:'+CRON_COL[est]+';color:'+CRON_TXT[est]+';text-align:center;font-size:10px;font-weight:700;padding:5px 1px;cursor:pointer;border-left:1px solid rgba(0,0,0,0.04)">'+est+'</td>';
-    }
-    body+='<td style="text-align:center;font-weight:700;color:#155724;font-size:11px">'+cT+'</td>';
-    body+='<td style="text-align:center;font-weight:700;color:#856404;background:#fffbea;font-size:11px">'+cF+'</td>';
-    body+='<td style="text-align:center;font-weight:700;color:#6f42c1;font-size:11px">'+cV+'</td></tr>';
-  });
-  document.getElementById('cron-body').innerHTML=body||'<tr><td colspan="'+(nd+4)+'" style="text-align:center;padding:20px;color:#ccc">Sin personas registradas</td></tr>';
-}
-
-function ciclar(pid,d){
-  var act=cronMat[pid]&&cronMat[pid][d]?cronMat[pid][d]:'T';
-  cronMat[pid][d]=ESTADOS[(ESTADOS.indexOf(act)+1)%ESTADOS.length];
-  var cron=getCron(),key=S.cronTipo+'-'+mesKey(S.cronMes,S.cronAnio);
-  if(!cron[key])cron[key]={};if(!cron[key][pid])cron[key][pid]={};
-  cron[key][pid][d]=cronMat[pid][d];
-  DB.save('cronograma',cron);renderCron();
-}
-
-function guardarCronograma(){
-  var key=S.cronTipo+'-'+mesKey(S.cronMes,S.cronAnio);
-  var cron=getCron();if(!cron[key])cron[key]={};
-  Object.keys(cronMat).forEach(function(pid){cron[key][pid]=cronMat[pid]});
-  DB.save('cronograma',cron);
-  alert('✅ Cronograma guardado correctamente');
-}
-
-function exportarCronJPG(){
-  var el=document.getElementById('cron-wrap');
-  var lbl=document.getElementById('cron-mes-label').textContent;
-  var tipo=S.cronTipo==='chofer'?'Choferes':'Personal';
-  // Scroll al inicio para captura completa
-  el.scrollLeft=0;el.scrollTop=0;
-  html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true,scrollX:0,scrollY:0,width:el.scrollWidth,height:el.scrollHeight}).then(function(canvas){
-    var a=document.createElement('a');
-    a.download='Cronograma_'+tipo+'_'+lbl.replace(/ /g,'_')+'.jpg';
-    a.href=canvas.toDataURL('image/jpeg',0.92);
-    a.click();
-  });
-}
-
-// ── LIQUIDACION ───────────────────────────────────────────────────────────────
-function renderLiq(){
-  var m=S.liqMes,a=S.liqAnio;
-  document.getElementById('liq-mes-label').textContent=mesStr(m,a).toUpperCase();
-  var t=getTar();
-  var chos=getChos().filter(function(c){return c.activo});
-  var recs=getRecs().filter(function(r){return r.m===m&&r.a===a});
-  var cron=getCron(),ck='chofer-'+mesKey(m,a);
-  var data=chos.map(function(ch){
-    var rc=recs.filter(function(r){return r.cid===ch.id&&!r.franco});
-    var hTot=0,det=[];
-    rc.forEach(function(r){
-      var hD=0;
-      (r.turnos||[]).forEach(function(tu){
-        if(tu.hi&&tu.hf){
-          var p1=tu.hi.split(':'),p2=tu.hf.split(':');
-          var mn=(parseInt(p2[0])*60+parseInt(p2[1]))-(parseInt(p1[0])*60+parseInt(p1[1]));
-          if(mn<0)mn+=1440;hD+=mn/60;hTot+=mn/60;
-        }
+    chs.forEach((chofer,ci)=>{
+      const turnos=day.choferes[chofer]||[];
+      const bgH=ci===0?'#c0392b':'#1a1a1a';
+      card+=`<div><div style="background:${bgH};color:#fff;padding:6px 16px;display:flex;justify-content:space-between;font-size:14px;font-weight:800;letter-spacing:1px"><span>${dayName.toUpperCase()} ${dayNum}</span><span>${chofer.toUpperCase()}</span></div><table style="width:100%;border-collapse:collapse">`;
+      turnos.forEach(t=>{
+        card+=`<tr style="border-bottom:1px solid #e5e7eb"><td style="padding:6px 16px;font-family:monospace;font-weight:700;font-size:13px;width:120px">${t.desde}</td><td style="padding:6px 4px;font-family:monospace;font-weight:700;font-size:13px;width:120px">${t.hasta}</td><td style="padding:6px 16px;font-size:13px;font-style:italic">${t.detalle}</td></tr>`;
       });
-      if(hD>0)det.push({d:r.d,h:hD,turnos:r.turnos});
+      card+=`</table></div>`;
     });
-    var fr=0;
-    if(cron[ck]&&cron[ck][ch.id])Object.values(cron[ck][ch.id]).forEach(function(e){if(e==='F')fr++});
-    return{ch:ch,h:Math.round(hTot*100)/100,dias:rc.length,fr:fr,imp:Math.round(hTot*t.esp*100)/100,det:det,vh:t.esp};
-  });
-  var tH=data.reduce(function(s,l){return s+l.h},0);
-  var tI=data.reduce(function(s,l){return s+l.imp},0);
-  document.getElementById('liq-kpis').innerHTML=
-    '<div class="kpi"><div class="kpi-val">'+chos.length+'</div><div class="kpi-lbl">Choferes</div></div>'+
-    '<div class="kpi azul"><div class="kpi-val">'+tH.toFixed(1)+' hs</div><div class="kpi-lbl">Total Horas</div></div>'+
-    '<div class="kpi naranja"><div class="kpi-val">'+fmtP(t.esp)+'</div><div class="kpi-lbl">Valor Hora</div></div>'+
-    '<div class="kpi verde"><div class="kpi-val">'+fmtP(tI)+'</div><div class="kpi-lbl">Total General</div></div>';
-  var html='';
-  data.forEach(function(l){
-    var exp=S.liqExp===l.ch.id;
-    html+='<div class="card" style="padding:0;overflow:hidden;margin-bottom:10px">';
-    html+='<div onclick="toggleLiq(\''+l.ch.id+'\')" style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;cursor:pointer'+(exp?';border-bottom:1px solid #eee':'')+'">';
-    html+='<div style="display:flex;align-items:center;gap:12px">';
-    html+='<div style="width:40px;height:40px;background:#c0392b;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:900;font-size:17px">'+l.ch.ap.charAt(0)+'</div>';
-    html+='<div><div style="font-size:15px;font-weight:800;color:#1a1a2e">'+l.ch.ap+' '+l.ch.nom+'</div>';
-    html+='<div style="font-size:11px;color:#999;margin-top:1px">'+l.dias+' días trabajados · '+l.fr+' francos</div></div></div>';
-    html+='<div style="display:flex;align-items:center;gap:16px">';
-    html+='<div style="font-size:19px;font-weight:900;color:#2980b9">'+l.h.toFixed(2)+' hs</div>';
-    html+='<div style="font-size:19px;font-weight:900;color:#27ae60">'+fmtP(l.imp)+'</div>';
-    html+='<span style="color:#ccc;font-size:14px">'+(exp?'▲':'▼')+'</span></div></div>';
-    if(exp){
-      html+='<div style="padding:12px 18px">';
-      if(!l.det.length){html+='<p style="color:#bbb;font-size:12px">Sin recorridos cargados.</p>'}
-      else{
-        html+='<table style="font-size:12px"><thead><tr style="background:#f4f4f7"><th>Día</th><th>Turno</th><th>Horas</th></tr></thead><tbody>';
-        l.det.forEach(function(d){
-          var tuv=d.turnos.filter(function(t){return t.hi&&t.hf});
-          tuv.forEach(function(t,ti){
-            var p1=t.hi.split(':'),p2=t.hf.split(':');
-            var mn=(parseInt(p2[0])*60+parseInt(p2[1]))-(parseInt(p1[0])*60+parseInt(p1[1]));
-            if(mn<0)mn+=1440;
-            html+='<tr style="border-bottom:1px solid #f0f0f0">';
-            if(ti===0)html+='<td rowspan="'+tuv.length+'" style="font-weight:700;color:#1a1a2e;padding:5px 10px;vertical-align:top">'+d.d+'/'+String(m+1).padStart(2,'0')+'</td>';
-            html+='<td style="padding:5px 10px;color:#555">'+t.hi+' → '+t.hf+(t.det?' · '+t.det:'')+'</td>';
-            html+='<td style="padding:5px 10px;color:#2980b9;font-weight:700;white-space:nowrap">'+(mn/60).toFixed(2)+' hs</td></tr>';
-          });
-        });
-        html+='<tr><td colspan="2" style="text-align:right;font-weight:700;padding:8px 10px;border-top:2px solid #eee">Total:</td>';
-        html+='<td style="font-weight:900;color:#2980b9;padding:8px 10px;border-top:2px solid #eee">'+l.h.toFixed(2)+' hs</td></tr>';
-        html+='<tr><td colspan="2" style="text-align:right;font-weight:700;padding:4px 10px">'+l.h.toFixed(2)+' hs × '+fmtP(l.vh)+':</td>';
-        html+='<td style="font-weight:900;color:#27ae60;font-size:14px;padding:4px 10px">'+fmtP(l.imp)+'</td></tr>';
-        html+='</tbody></table>';
+  }
+  card+=`</div>`;
+
+  document.getElementById('dayModalBody').innerHTML=`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1.5px solid var(--border)">
+      <div style="font-family:var(--font-display);font-size:19px;font-weight:800;letter-spacing:1px">${dayName.toUpperCase()} ${dayNum} DE ${mName.toUpperCase()}</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-green btn-sm" onclick="downloadDayJPG()">📷 Descargar JPG</button>
+        <button class="btn btn-blue btn-sm" onclick="copiarDiaAnterior('${dateStr}')">📋 Copiar día anterior</button>
+        <button class="x-btn" onclick="closeM('dayModal')">✕</button>
+      </div>
+    </div>
+    <div style="padding:14px 18px">
+      ${card}
+      <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary btn-sm" onclick="addChoferToDay2()">+ Agregar Chofer</button>
+        ${chs.map(c=>`<button class="btn btn-outline btn-sm" onclick="addTurnoModal('${c}')">+ Turno · ${c.split(' ')[0]}</button>`).join('')}
+        ${chs.map(c=>`<button class="btn btn-danger btn-sm" onclick="removeChoferModal('${c}')">✕ ${c.split(' ')[0]}</button>`).join('')}
+      </div>
+    </div>`;
+}
+
+function addChoferToDay2(){const all=recState.choferes.length?recState.choferes:getAllChoferes();const chofer=prompt('Nombre del chofer:'+(all.length?'\n'+all.join('\n'):''),'');if(!chofer||!chofer.trim())return;const nombre=chofer.trim().toUpperCase();if(!recState.days[currentDayStr])recState.days[currentDayStr]={choferes:{}};if(!recState.days[currentDayStr].choferes[nombre])recState.days[currentDayStr].choferes[nombre]=[];saveRec();renderDayModal();renderRecorridos();}
+function addTurnoModal(chofer){const desde=prompt('Hora DESDE (ej: 20:00):','');if(!desde||!desde.includes(':'))return;const hasta=prompt('Hora HASTA (ej: 23:00):','');if(!hasta||!hasta.includes(':'))return;const detalle=prompt('Detalle:','Recorrido');if(detalle===null)return;recState.days[currentDayStr].choferes[chofer].push({desde,hasta,detalle:detalle||'Recorrido'});saveRec();renderDayModal();renderRecorridos();}
+function removeChoferModal(chofer){if(!confirm('¿Quitar a '+chofer+' de este día?'))return;delete recState.days[currentDayStr].choferes[chofer];saveRec();renderDayModal();renderRecorridos();}
+
+function copiarDiaAnterior(dateStr){
+  const d=new Date(dateStr+'T12:00:00');
+  const prev=new Date(d);
+  prev.setDate(prev.getDate()-1);
+  const prevStr=prev.toISOString().split('T')[0];
+  const prevDay=prev.getDate();
+  const prevData=recState.days[prevStr];
+  if(!prevData||!Object.keys(prevData.choferes).length){
+    toast('El día '+prevDay+' no tiene recorridos cargados','err');
+    return;
+  }
+  if(!confirm('¿Copiar todos los choferes y turnos del día '+prevDay+' a este día?\nSe reemplazará lo que haya cargado.'))return;
+  // Deep copy
+  recState.days[dateStr]=JSON.parse(JSON.stringify(prevData));
+  saveRec();
+  renderDayModal();
+  renderRecorridos();
+  toast('Día '+prevDay+' copiado ✓','ok');
+}
+
+async function downloadDayJPG(){
+  const card=document.getElementById('dayPrintCard');
+  if(!card){toast('Error al generar imagen','err');return;}
+  try{
+    toast('Generando JPG...','');
+    const canvas=await html2canvas(card,{scale:2,useCORS:true,backgroundColor:'#ffffff',logging:false});
+    const link=document.createElement('a');
+    const d=new Date(currentDayStr+'T12:00:00');
+    const dn=['domingo','lunes','martes','miercoles','jueves','viernes','sabado'][d.getDay()];
+    link.download=`COFCO_${dn}_${currentDayStr}.jpg`;
+    link.href=canvas.toDataURL('image/jpeg',0.95);
+    link.click();
+    toast('JPG descargado ✓','ok');
+  }catch(e){toast('Error al generar JPG','err');console.error(e);}
+}
+
+function openChoferesMgr(){
+  const names=recState.choferes;
+  document.getElementById('choferModalBody').innerHTML=`<div style="padding:20px">
+    <div style="font-family:var(--font-display);font-size:18px;font-weight:800;margin-bottom:12px">GESTIONAR CHOFERES</div>
+    <div id="choferesTags" style="margin-bottom:14px">${names.map((c,i)=>`<span class="chofer-tag">${c}<span class="remove" onclick="removeChofer(${i})">✕</span></span>`).join('')}</div>
+    <div style="display:flex;gap:8px"><input id="newChoferInput" type="text" class="search-box" placeholder="Nuevo chofer (APELLIDO NOMBRE)" style="flex:1"><button class="btn btn-primary" onclick="addChofer()">+ Agregar</button></div>
+    <div style="margin-top:14px;display:flex;justify-content:flex-end"><button class="btn btn-outline" onclick="closeM('choferModal')">Cerrar</button></div>
+  </div>`;
+  openM('choferModal');
+}
+function addChofer(){const val=document.getElementById('newChoferInput').value.trim().toUpperCase();if(!val)return;if(!recState.choferes.includes(val))recState.choferes.push(val);saveRec();openChoferesMgr();}
+function removeChofer(i){recState.choferes.splice(i,1);saveRec();openChoferesMgr();}
+
+// ══════════════════════════════════════════════════════════
+// CRONOGRAMA DE FRANCOS
+// ══════════════════════════════════════════════════════════
+const SK_CRON='cnt_cronograma_v1';
+let cronState=loadCronState();
+
+function loadCronState(){try{const s=JSON.parse(localStorage.getItem(SK_CRON));if(s)return s;}catch(e){}return{tipo:'chofer',viewYear:new Date().getFullYear(),viewMonth:new Date().getMonth(),data:{}};}
+function saveCronLS(){localStorage.setItem(SK_CRON,JSON.stringify(cronState));}
+
+const ESTADOS_CRON=['T','F','G','VAC','LIC'];
+const CRON_CSS={T:'estado-T',F:'estado-F',G:'estado-G',VAC:'estado-VAC',LIC:'estado-LIC'};
+
+function cronKey(tipo,y,m){return `${tipo}_${y}_${m}`;}
+function getCronData(){const k=cronKey(cronState.tipo,cronState.viewYear,cronState.viewMonth);if(!cronState.data[k])cronState.data[k]={};return cronState.data[k];}
+
+function getPersonasCron(){
+  if(cronState.tipo==='chofer'){
+    // Use choferes from recState
+    const chs=recState.choferes.length?recState.choferes:getAllChoferes();
+    return chs.length?chs:['GONZALEZ','REINA','BARRERA','BOLADO'];
+  } else {
+    const k='personal_list';
+    return cronState[k]||[];
+  }
+}
+
+function renderCronograma(){
+  const y=cronState.viewYear,m=cronState.viewMonth;
+  const MN=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  document.getElementById('cron-month-label').textContent=MN[m]+' '+y;
+  document.getElementById('cron-btn-chofer').className='btn btn-sm'+(cronState.tipo==='chofer'?' btn-dark':' btn-outline');
+  document.getElementById('cron-btn-personal').className='btn btn-sm'+(cronState.tipo==='personal'?' btn-dark':' btn-outline');
+
+  const dim=new Date(y,m+1,0).getDate();
+  const personas=getPersonasCron();
+  const data=getCronData();
+
+  // Build header
+  let thead=`<thead><tr><th style="min-width:130px;text-align:left;padding:6px 10px;position:sticky;left:0;z-index:3">NOMBRE</th>`;
+  for(let d=1;d<=dim;d++){
+    const dw=new Date(y,m,d).getDay();
+    const isDOM=dw===0,isSAB=dw===6;
+    const cls=isDOM?' class="dom-col"':isSAB?' class="sab-col"':'';
+    const label=['D','L','M','X','J','V','S'][dw];
+    thead+=`<th${cls}><div>${label}</div><div>${d}</div></th>`;
+  }
+  thead+=`<th style="min-width:28px;background:#374151">T</th><th style="min-width:28px;background:#374151">F</th><th style="min-width:28px;background:#374151">VAC</th></tr></thead>`;
+
+  // Build body
+  let tbody=`<tbody>`;
+  if(!personas.length){
+    tbody+=`<tr><td colspan="${dim+4}" style="padding:30px;text-align:center;color:var(--muted);font-size:13px">Sin ${cronState.tipo==='chofer'?'choferes':'personal'} registrado.<br>${cronState.tipo==='personal'?'<button onclick="addPersonalCron()" class="btn btn-outline btn-sm" style="margin-top:8px">+ Agregar personal</button>':''}</td></tr>`;
+  } else {
+    personas.forEach(persona=>{
+      if(!data[persona])data[persona]={};
+      let cT=0,cF=0,cV=0;
+      for(let d=1;d<=dim;d++){if(!data[persona][d])data[persona][d]='T';const e=data[persona][d];if(e==='T')cT++;if(e==='F')cF++;if(e==='VAC')cV++;}
+      tbody+=`<tr><td class="name-cell">${persona}</td>`;
+      for(let d=1;d<=dim;d++){
+        const est=data[persona][d]||'T';
+        tbody+=`<td class="${CRON_CSS[est]}" onclick="ciclarCron('${persona}',${d})" title="${est}">${est}</td>`;
       }
-      html+='</div>';
-    }
-    html+='</div>';
-  });
-  document.getElementById('liq-lista').innerHTML=html||'<div class="card" style="text-align:center;padding:30px;color:#ccc">Sin choferes activos</div>';
-}
-function toggleLiq(id){S.liqExp=S.liqExp===id?null:id;renderLiq()}
-
-// ── CHOFERES ──────────────────────────────────────────────────────────────────
-function renderChos(){
-  var chs=getChos(),html='';
-  chs.forEach(function(c){
-    html+='<tr style="border-bottom:1px solid #eee">';
-    html+='<td style="font-weight:700;color:#1a1a2e">'+c.ap+' '+c.nom+'</td>';
-    html+='<td><span style="background:'+(c.tipo==='combi'?'#dcfce7':'#dbeafe')+';color:'+(c.tipo==='combi'?'#166534':'#1e40af')+';padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700">'+c.tipo.toUpperCase()+'</span></td>';
-    html+='<td><span class="badge '+(c.activo?'b-T':'b-F')+'">'+(c.activo?'Activo':'Inactivo')+'</span></td>';
-    html+='<td><button onclick="abrirModalPersona(\''+c.id+'\',\'chofer\')" style="background:none;border:none;cursor:pointer">✏️</button> <button onclick="toggleActivo(\''+c.id+'\',\'chofer\')" style="background:none;border:none;cursor:pointer;font-size:15px">'+(c.activo?'🔴':'🟢')+'</button></td></tr>';
-  });
-  document.getElementById('cho-tbody').innerHTML=html;
-  var pers=getPers(),phtml='';
-  pers.forEach(function(p){
-    phtml+='<tr style="border-bottom:1px solid #eee">';
-    phtml+='<td style="font-weight:700">'+p.ap+' '+p.nom+'</td>';
-    phtml+='<td style="color:#666">'+(p.sec||'')+'</td>';
-    phtml+='<td><span class="badge '+(p.activo?'b-T':'b-F')+'">'+(p.activo?'Activo':'Inactivo')+'</span></td>';
-    phtml+='<td><button onclick="abrirModalPersona(\''+p.id+'\',\'personal\')" style="background:none;border:none;cursor:pointer">✏️</button> <button onclick="toggleActivo(\''+p.id+'\',\'personal\')" style="background:none;border:none;cursor:pointer;font-size:15px">'+(p.activo?'🔴':'🟢')+'</button></td></tr>';
-  });
-  document.getElementById('per-tbody').innerHTML=phtml||'<tr><td colspan="4" style="text-align:center;padding:20px;color:#ccc">Sin personal cargado</td></tr>';
-}
-
-function abrirModalPersona(id,tipo){
-  var lista=tipo==='chofer'?getChos():getPers();
-  var obj=id?lista.find(function(x){return x.id===id}):null;
-  var esCho=tipo==='chofer';
-  var html='<div class="overlay" onclick="if(event.target===this)cerrarCho()">';
-  html+='<div class="modal"><div class="modal-top"><h2>'+(obj?(esCho?'Editar chofer':'Editar personal'):(esCho?'Nuevo chofer':'Nuevo personal'))+'</h2>';
-  html+='<button onclick="cerrarCho()" style="background:none;border:none;font-size:22px;cursor:pointer">✕</button></div>';
-  html+='<div class="modal-body">';
-  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
-  html+='<label style="font-size:11px;font-weight:700">APELLIDO<br><input id="pf-ap" value="'+(obj?obj.ap:'')+'" placeholder="GONZALEZ" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">NOMBRE<br><input id="pf-nom" value="'+(obj?obj.nom:'')+'" style="width:100%"></label>';
-  if(esCho){html+='<label style="font-size:11px;font-weight:700">TIPO<br><select id="pf-tipo" style="width:100%"><option value="auto"'+(obj&&obj.tipo==='auto'?' selected':'')+'>Auto</option><option value="combi"'+(obj&&obj.tipo==='combi'?' selected':'')+'>Combi</option></select></label>'}
-  else{html+='<label style="font-size:11px;font-weight:700">SECTOR<br><input id="pf-sec" value="'+(obj&&obj.sec?obj.sec:'')+'" style="width:100%"></label>'}
-  html+='</div>';
-  html+='<div style="display:flex;gap:8px;justify-content:flex-end">';
-  html+='<button class="btn btn-red" onclick="guardarPersona(\''+(id||'')+'\',\''+tipo+'\')">💾 Guardar</button>';
-  html+='<button class="btn btn-gray" onclick="cerrarCho()">Cancelar</button></div>';
-  html+='</div></div></div>';
-  document.getElementById('cho-modal').innerHTML=html;document.getElementById('cho-modal').style.display='block';
-}
-
-function guardarPersona(id,tipo){
-  var ap=(document.getElementById('pf-ap').value||'').trim().toUpperCase();
-  var nom=(document.getElementById('pf-nom').value||'').trim().toUpperCase();
-  if(!ap)return alert('Apellido requerido');
-  if(tipo==='chofer'){
-    var chs=getChos();
-    var ob={id:id||uid(),ap:ap,nom:nom,tipo:document.getElementById('pf-tipo').value,activo:true};
-    if(id){var i=chs.findIndex(function(c){return c.id===id});if(i>=0){ob.activo=chs[i].activo;chs[i]=ob}}else chs.push(ob);
-    DB.save('choferes',chs);
-  } else {
-    var ps=getPers();
-    var sec=document.getElementById('pf-sec')?document.getElementById('pf-sec').value:'';
-    var op={id:id||uid(),ap:ap,nom:nom,sec:sec,activo:true};
-    if(id){var pi=ps.findIndex(function(p){return p.id===id});if(pi>=0){op.activo=ps[pi].activo;ps[pi]=op}}else ps.push(op);
-    DB.save('personal',ps);
+      tbody+=`<td class="sum-cell" style="color:#065f46">${cT}</td><td class="sum-cell" style="color:#92400e">${cF}</td><td class="sum-cell" style="color:#5b21b6">${cV}</td></tr>`;
+    });
   }
-  cerrarCho();
-}
-function toggleActivo(id,tipo){
-  if(tipo==='chofer'){var chs=getChos(),c=chs.find(function(x){return x.id===id});if(c){c.activo=!c.activo;DB.save('choferes',chs)}}
-  else{var ps=getPers(),p=ps.find(function(x){return x.id===id});if(p){p.activo=!p.activo;DB.save('personal',ps)}}
-  renderChos();
-}
-function cerrarCho(){document.getElementById('cho-modal').style.display='none';renderChos()}
+  tbody+=`</tbody>`;
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
-importarDatosExcel();
-renderRec();
+  document.getElementById('cron-table').innerHTML=thead+tbody;
+
+  // Add personal button if needed
+  if(cronState.tipo==='personal'){
+    const wrap=document.getElementById('cron-table').parentElement;
+    let btn=document.getElementById('cron-add-personal-btn');
+    if(!btn){btn=document.createElement('div');btn.id='cron-add-personal-btn';btn.style.cssText='padding:10px 14px;border-top:1.5px dashed var(--border)';wrap.after(btn);}
+    btn.innerHTML=`<button class="btn btn-outline btn-sm" onclick="addPersonalCron()">+ Agregar persona al cronograma</button>`;
+  }
+}
+
+function ciclarCron(persona,dia){
+  const data=getCronData();
+  if(!data[persona])data[persona]={};
+  const actual=data[persona][dia]||'T';
+  const idx=ESTADOS_CRON.indexOf(actual);
+  data[persona][dia]=ESTADOS_CRON[(idx+1)%ESTADOS_CRON.length];
+  saveCronLS();
+  // Update just that cell for performance
+  renderCronograma();
+}
+
+function cronSwitch(tipo){cronState.tipo=tipo;saveCronLS();renderCronograma();}
+function cronPrevMonth(){cronState.viewMonth--;if(cronState.viewMonth<0){cronState.viewMonth=11;cronState.viewYear--;}saveCronLS();renderCronograma();}
+function cronNextMonth(){cronState.viewMonth++;if(cronState.viewMonth>11){cronState.viewMonth=0;cronState.viewYear++;}saveCronLS();renderCronograma();}
+function saveCron(){saveCronLS();toast('Cronograma guardado ✓','ok');}
+
+function addPersonalCron(){
+  const nombre=prompt('Nombre completo del pasajero/personal:','');
+  if(!nombre||!nombre.trim())return;
+  const k='personal_list';
+  if(!cronState[k])cronState[k]=[];
+  const n=nombre.trim().toUpperCase();
+  if(!cronState[k].includes(n))cronState[k].push(n);
+  saveCronLS();renderCronograma();
+}
+
+// ══════════════════════════════════════════════════════════
+// LIQUIDACIÓN MEJORADA
+// ══════════════════════════════════════════════════════════
+function renderLiquidacion(){
+  const year=recState.viewYear,month=recState.viewMonth;
+  const MN=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const valorHora=recState.valorHora||5805.20;
+  const prefix=`${year}-${String(month+1).padStart(2,'0')}-`;
+
+  // Horas por chofer desde RECORRIDOS
+  const chHoras={};
+  Object.entries(recState.days).forEach(([ds,day])=>{
+    if(!ds.startsWith(prefix))return;
+    Object.entries(day.choferes).forEach(([chofer,turnos])=>{
+      if(!chHoras[chofer])chHoras[chofer]={horas:0,dias:new Set(),detalle:[]};
+      turnos.forEach(t=>{
+        const h=parseHours(t.desde,t.hasta);
+        chHoras[chofer].horas+=h;
+        chHoras[chofer].dias.add(ds);
+        chHoras[chofer].detalle.push({fecha:ds,desde:t.desde,hasta:t.hasta,detalle:t.detalle,h});
+      });
+    });
+  });
+
+  // Francos desde CRONOGRAMA
+  const cronData=cronState.data[cronKey('chofer',year,month)]||{};
+
+  const totH=Object.values(chHoras).reduce((s,c)=>s+c.horas,0);
+  const totI=Object.values(chHoras).reduce((s,c)=>s+(c.horas*valorHora),0);
+
+  let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+    <div>
+      <div style="font-family:var(--font-display);font-size:22px;font-weight:800;letter-spacing:2px">LIQUIDACIÓN — ${MN[month].toUpperCase()} ${year}</div>
+      <div style="font-size:13px;color:var(--muted);margin-top:2px">
+        Valor hora chofer: <strong style="font-family:var(--font-mono)">$${fn(valorHora)}</strong>
+        <button onclick="editValorHora()" style="background:none;border:none;cursor:pointer;color:var(--accent);font-size:12px;font-weight:700;margin-left:8px">✏ editar</button>
+        <span style="margin-left:16px;color:#9ca3af;font-size:11px">⚠ Este valor es independiente de la tarifa de espera al cliente</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <div class="month-nav">
+        <button class="btn btn-outline btn-sm" onclick="liqPrevMonth()">‹</button>
+        <span style="font-family:var(--font-display);font-size:14px;font-weight:700;min-width:140px;text-align:center">${MN[month].toUpperCase()} ${year}</span>
+        <button class="btn btn-outline btn-sm" onclick="liqNextMonth()">›</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Totales resumen -->
+  <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:10px;margin-bottom:20px">
+    <div class="stat-card"><div class="stat-lbl">Choferes</div><div class="stat-val">${Object.keys(chHoras).length}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Total Horas</div><div class="stat-val c-blue">${Math.round(totH*10)/10} hs</div></div>
+    <div class="stat-card"><div class="stat-lbl">Valor Hora</div><div class="stat-val c-yellow">$${fn(valorHora)}</div></div>
+    <div class="stat-card"><div class="stat-lbl">Total Liquidación</div><div class="stat-val c-green">$${fn(totI)}</div></div>
+  </div>`;
+
+  if(!Object.keys(chHoras).length){
+    html+=`<div style="background:#fff;border:1.5px solid var(--border);border-radius:12px;padding:40px;text-align:center;color:var(--muted)">
+      No hay turnos registrados para este mes en la sección Recorridos.<br>
+      <button class="btn btn-outline" style="margin-top:12px" onclick="switchAppTab('recorridos')">← Ir a Recorridos</button>
+    </div>`;
+  } else {
+    html+=`<div class="liq-grid">`;
+    Object.entries(chHoras).sort((a,b)=>b[1].horas-a[1].horas).forEach(([chofer,data])=>{
+      const horas=Math.round(data.horas*10)/10;
+      const total=horas*valorHora;
+      const diasTrabajados=data.dias.size;
+
+      // Francos del cronograma
+      const cronChofer=cronData[chofer]||{};
+      const francos=Object.values(cronChofer).filter(e=>e==='F').length;
+      const vacaciones=Object.values(cronChofer).filter(e=>e==='VAC').length;
+
+      html+=`<div class="liq-card">
+        <div class="liq-card-header">
+          <div class="liq-chofer-name">${chofer}</div>
+          <div style="text-align:right">
+            <div style="font-family:var(--font-mono);font-size:18px;font-weight:700">${horas} hs</div>
+            <div style="font-size:11px;color:#9ca3af">${diasTrabajados} días</div>
+          </div>
+        </div>
+        <div class="liq-card-body">
+          <div class="liq-row"><span class="liq-label">Horas trabajadas</span><span class="liq-val">${horas} hs</span></div>
+          <div class="liq-row"><span class="liq-label">Valor por hora</span><span class="liq-val">$${fn(valorHora)}</span></div>
+          <div class="liq-row"><span class="liq-label">Días con turnos</span><span class="liq-val">${diasTrabajados}</span></div>
+          ${francos>0?`<div class="liq-row"><span class="liq-label" style="color:var(--yellow)">Francos (cronograma)</span><span class="liq-val" style="color:var(--yellow)">${francos}</span></div>`:''}
+          ${vacaciones>0?`<div class="liq-row"><span class="liq-label" style="color:#7c3aed">Vacaciones</span><span class="liq-val" style="color:#7c3aed">${vacaciones}</span></div>`:''}
+          <!-- Detalle de turnos colapsable -->
+          <details style="margin-top:8px">
+            <summary style="cursor:pointer;font-size:11px;color:var(--muted);font-weight:600;user-select:none">Ver detalle de turnos ▾</summary>
+            <div style="margin-top:6px;max-height:160px;overflow-y:auto">
+              ${data.detalle.map(t=>`<div class="liq-det-row"><span class="dia">${fd(t.fecha)}</span><span>${t.desde}→${t.hasta}</span><span style="flex:1;color:#6b7280;font-size:10px;margin-left:4px">${t.detalle}</span><span class="hrs">${t.h}h</span></div>`).join('')}
+            </div>
+          </details>
+        </div>
+        <div class="liq-total-row">
+          <span class="liq-total-label">TOTAL</span>
+          <span class="liq-total-val">$${fn(total)}</span>
+        </div>
+      </div>`;
+    });
+    html+=`</div>`;
+  }
+  document.getElementById('app-liquidacion').innerHTML=html;
+}
+
+function liqPrevMonth(){recState.viewMonth--;if(recState.viewMonth<0){recState.viewMonth=11;recState.viewYear--;}saveRec();renderLiquidacion();}
+function liqNextMonth(){recState.viewMonth++;if(recState.viewMonth>11){recState.viewMonth=0;recState.viewYear++;}saveRec();renderLiquidacion();}
+function editValorHora(){const v=prompt('Nuevo valor hora del chofer (diferente a la tarifa de espera al cliente):',recState.valorHora||5805.20);if(v&&!isNaN(parseFloat(v))){recState.valorHora=parseFloat(v);saveRec();renderLiquidacion();}}
+
+// ══════════════════════════════════════════════════════════
+// TAB SWITCHER
+// ══════════════════════════════════════════════════════════
+function switchAppTab(tab){
+  document.querySelectorAll('.app-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.app-page').forEach(p=>p.classList.remove('active'));
+  const btn=document.getElementById('tab-'+tab);
+  const page=document.getElementById('app-'+tab);
+  if(btn)btn.classList.add('active');
+  if(page)page.classList.add('active');
+  if(tab==='recorridos')renderRecorridos();
+  if(tab==='cronograma')renderCronograma();
+  if(tab==='liquidacion')renderLiquidacion();
+}
+
+// ══════════════════════════════════════════════════════════
+// HELPERS
+// ══════════════════════════════════════════════════════════
+function fd(d){if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`}
+function f2(n){return parseFloat(n).toFixed(2)}
+function fn(n){return(parseFloat(n)||0).toLocaleString('es-AR',{minimumFractionDigits:2,maximumFractionDigits:2})}
+function esc(s){return(s||'').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function openM(id){document.getElementById(id).classList.add('open')}
+function closeM(id){document.getElementById(id).classList.remove('open')}
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show'+(type?' '+type:'');setTimeout(()=>t.classList.remove('show'),2800);}
+
+document.querySelectorAll('.modal-ov,.confirm-ov').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open')}));
+
+// ══════════════════════════════════════════════════════════
+// INIT — precargar datos Excel
+// ══════════════════════════════════════════════════════════
+(function preload(){
+  const p=curP();
+  if(!p||p.rows.length>0){renderAll();return;}
+  const tarifas={km:497.22,esp:3808.60,auto:21698.58,combi:43397.16};
+  p.t=tarifas;
+  p.name='FEBRERO - MARZO 2026';
+  const raw=[
+    {fecha:'2026-02-25',chofer:'BOLADO',horario:'18:00',detalle:'RETIRA VENCHE DANIEL',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-02-25',chofer:'BOLADO',horario:'20:00',detalle:'RETIRA FIGGINI CRISTIAN Y TORO HECTOR',costoExt:'5646.73',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-02-26',chofer:'YANNIBELLI',horario:'16:00',detalle:'TRASLADO DE MARIANO BELLADA DESDE JUNIN AL HOTEL HORIZONTE DE SAN LORENZO',costoExt:'',tipo:'AUTO',km:'468',hbEsp:''},
+    {fecha:'2026-02-26',chofer:'BOLADO',horario:'18:00',detalle:'RETIRA VENCHE DANIEL',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-02-26',chofer:'REINA',horario:'20:00',detalle:'RETIRA FIGGINI CRISTIAN, ARGUELLO, HAILANT SEBASTIAN, ZALAZAR ESTEBAN, RETAMOZO JONA, MACHELLO AGUSTIN, TORO HECTOR, RAGUZA MAXIMO Y FERREYRA SAMUEL',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-02-27',chofer:'MUGNOLO',horario:'16:00',detalle:'TRASLADO DE PLANTA TIMBUES A JUNIN AL OPERARIO MARIANO BELLADA',costoExt:'',tipo:'AUTO',km:'484',hbEsp:''},
+    {fecha:'2026-02-27',chofer:'GONZALEZ',horario:'20:00',detalle:'RETIRA TORO HECTOR, FERREYRA SAMUEL, RAGUZA MAXIMO, MACHELLO AGUSTIN',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-02-28',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA YASMIN RECALT, VERA THIAGO Y LUCARENA ULISES',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-02-28',chofer:'GONZALEZ',horario:'20:00',detalle:'RETIRA TORO HECTOR, FERREYRA SAMUEL, FIGGINI CRISTIAN, MACHELLO AGUSTIN',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-01',chofer:'REINA',horario:'10:00',detalle:'RETIRA YAZMIN RECALT',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-02',chofer:'LORONI',horario:'4:30',detalle:'TRASLADO DE GUADALUPE LESCANO DESDE JUNIN AL PGSM',costoExt:'',tipo:'AUTO',km:'476',hbEsp:''},
+    {fecha:'2026-03-02',chofer:'GONZALEZ',horario:'9:00',detalle:'RETIRA LUGLI JUAN',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-02',chofer:'GONZALEZ',horario:'18:00',detalle:'INGRESA GONZALEZ MATIAS - RETIRA VIALE WALDO',costoExt:'5646.73',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-02',chofer:'BOLADO',horario:'20:00',detalle:'RETIRA TORO HECTOR Y MACHELLO AGUSTIN',costoExt:'5646.73',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-03',chofer:'PESOINBOURE',horario:'7:30',detalle:'TRASLADO DESDE JUNIN A BALCARCE AL OPERARIO DIEGO RODRIGUEZ TERRONES',costoExt:'',tipo:'AUTO',km:'980',hbEsp:''},
+    {fecha:'2026-03-03',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA GONZALEZ MATIAS',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-03',chofer:'REINA',horario:'20:00',detalle:'RETIRA FIGGINI CRISTIAN, TORO HECTOR, MACHELLO AGUSTIN, FERREYRA SAMUEL Y HISSIRIBEHERE GIANFRANCO',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-04',chofer:'BOLADO',horario:'15:00',detalle:'RETIRA VIALE WALDO',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-04',chofer:'GONZALEZ',horario:'18:00',detalle:'RETIRA HISSIRIBEHERE GIANFRANCO',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-04',chofer:'GONZALEZ',horario:'20:00',detalle:'RETIRA RAGUZA MAXIMO, TORO HECTOR Y FERREYRA SAMUEL',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-05',chofer:'YEBER',horario:'12:30',detalle:'TRASLADO DESDE VILLEGAS A JUNIN AL OPERARIO RODRIGUEZ TERRONES DIEGO',costoExt:'',tipo:'AUTO',km:'412',hbEsp:''},
+    {fecha:'2026-03-05',chofer:'REINA',horario:'18:00',detalle:'INGRESA HISSIRIBEHERE GIANFRANCO - RETIRA BEVILACKUA BENJAMIN, FERREYRA SAMUEL, ZALAZAR BRUNO Y MACHELLO AGUSTIN',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-05',chofer:'BOLADO',horario:'20:00',detalle:'RETIRA FIGGINI CRISTIAN, RAGUZA MAXIMO Y TORO HECTOR',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-06',chofer:'TOLEDO',horario:'8:30',detalle:'TRASLADOS DE LOS OPERARIOS VAZQUE ALEXIS Y ALTAMIRANO LEONARDO DESDE JUNIN A SAN NICOLAS - CON ESPERA',costoExt:'',tipo:'AUTO',km:'330',hbEsp:'9'},
+    {fecha:'2026-03-06',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA SANCHEZ DIEGO',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-06',chofer:'GONZALEZ',horario:'18:00',detalle:'RETIRA RAGUZA MAXIMO, HISSIRIBEHERE GIANFRANCO, TORO HECTOR, FIGGINI CRISTIAN, ZALAZAR BRUNO Y VUGLIOTTI WALTER',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-06',chofer:'BOLADO',horario:'20:00',detalle:'RETIRA FERREYRA SAMUEL',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-07',chofer:'REINA',horario:'10:00',detalle:'RETIRA LUCARENA ULISES, VERA THIAGO, MELVIHILL Y PALOMINO',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-07',chofer:'BOLADO',horario:'18:00',detalle:'INGRESA ROZUADONSQUEY CLARA - RETIRA ROMERO MARIA',costoExt:'5646.73',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-07',chofer:'REINA',horario:'20:00',detalle:'RETIRA RAGUZA MAXIMO, ZALAZAR BRUNO, FERREYRA SAMUEL, TORO HECTOR Y MACHELLO AGUSTIN',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-08',chofer:'BOLADO',horario:'2:00',detalle:'RETIRA CLARA ROZUADONSQUEY',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-08',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA SANCHEZ DIEGO',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-08',chofer:'BOLADO',horario:'18:00',detalle:'RETIRA TALLARICO NICOLAS',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-09',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA SANCHEZ DIEGO',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-09',chofer:'REINA',horario:'19:00',detalle:'INGRESA TORO HECTOR',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-10',chofer:'MEDINA',horario:'5:00',detalle:'TRASLADO DESDE JUNIN A TIMBUES A LA OPERARIO IGLESIAS GISELA - CON ESPERA',costoExt:'',tipo:'AUTO',km:'484',hbEsp:'8'},
+    {fecha:'2026-03-10',chofer:'REINA',horario:'18:00',detalle:'INGRESA TORO HECTOR',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-10',chofer:'BARRERA',horario:'20:00',detalle:'RETIRA RAGUSA MAXIMO, MACHELLO AGUSTIN, HAILANT SEBASTIAN, CERUNDULO DAVID, ARGUELLO FRANCO, OREJON FRANCO, MONSON NICOLAS Y RODRIGUEZ RENSO',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-11',chofer:'BARRERA',horario:'2:00',detalle:'INGRESA MONZON ELIO',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-11',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA AGUIRRE RAMON',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-11',chofer:'BOLADO',horario:'18:00',detalle:'INGRESA TORO HECTOR',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-11',chofer:'BARRERA',horario:'20:00',detalle:'RETIRA PALOMERO BAUTISTA, BEVILACKUA BENJAMIN, FERREYRA SAMUEL Y OREJON FRANCO',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+  ];
+  raw.forEach(r=>{const row=newRow();Object.assign(row,r);calcRow(row,tarifas);p.rows.push(row);});
+  save();renderAll();
+})();
 </script>
 </body>
 </html>
