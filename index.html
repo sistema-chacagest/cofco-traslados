@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>COFCO Traslados</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:Arial,sans-serif;font-size:13px;background:#f4f4f7;color:#222}
@@ -21,23 +23,24 @@ body{font-family:Arial,sans-serif;font-size:13px;background:#f4f4f7;color:#222}
 .sb-foot{padding:12px 14px;border-top:1px solid rgba(255,255,255,0.1)}
 .sb-user{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6}
 #main{flex:1;overflow-y:auto;padding:22px;background:#f4f4f7}
-.page{display:none}
-.page.active{display:block}
+.page{display:none}.page.active{display:block}
 .ph{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px;flex-wrap:wrap;gap:10px}
 .ph h1{font-size:20px;font-weight:900;color:#1a1a2e}
 .ph p{font-size:12px;color:#888;margin-top:2px}
 .mes-nav{display:flex;align-items:center;gap:8px}
-.mes-nav .mn-btn{width:32px;height:32px;border:1px solid #ccc;background:#fff;border-radius:5px;font-size:18px;font-weight:900;cursor:pointer;line-height:1}
+.mn-btn{width:32px;height:32px;border:1px solid #ccc;background:#fff;border-radius:5px;font-size:18px;font-weight:900;cursor:pointer}
 .mes-label{font-size:14px;font-weight:800;color:#1a1a2e;min-width:165px;text-align:center}
-.btn{border:none;border-radius:5px;padding:8px 15px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
+.btn{border:none;border-radius:5px;padding:8px 14px;font-size:12px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
 .btn:hover{opacity:0.85}
 .btn-red{background:#c0392b;color:#fff}
 .btn-green{background:#27ae60;color:#fff}
 .btn-blue{background:#2980b9;color:#fff}
 .btn-gray{background:#e0e0e0;color:#333}
+.btn-orange{background:#e67e22;color:#fff}
+.btn-purple{background:#8e44ad;color:#fff}
 .card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:16px;margin-bottom:14px}
 input,select,textarea{border:1.5px solid #ddd;border-radius:5px;padding:6px 9px;font-size:12px;background:#fff;color:#222;outline:none;font-family:Arial,sans-serif}
-input:focus,select:focus,textarea:focus{border-color:#c0392b}
+input:focus,select:focus{border-color:#c0392b}
 table{border-collapse:collapse;width:100%}
 th,td{padding:7px 10px;text-align:left;font-size:12px}
 .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:14px}
@@ -58,16 +61,17 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
 .cho-bloque-nombre{font-weight:800;font-size:13px;color:#c0392b;text-transform:uppercase}
 .turno-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px dashed #eee;flex-wrap:wrap}
 .badge{display:inline-block;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700}
-.b-T{background:#d4edda;color:#155724}
-.b-F{background:#fff3cd;color:#856404}
-.b-G{background:#cce5ff;color:#004085}
-.b-VAC{background:#e2d9f3;color:#6f42c1}
+.b-T{background:#d4edda;color:#155724}.b-F{background:#fff3cd;color:#856404}
+.b-G{background:#cce5ff;color:#004085}.b-VAC{background:#e2d9f3;color:#6f42c1}
 .b-LIC{background:#f8d7da;color:#721c24}
 .tab-btn{background:#e0e0e0;border:none;padding:7px 14px;border-radius:5px;font-size:12px;font-weight:600;cursor:pointer;margin-right:4px;transition:all 0.15s}
 .tab-btn.active{background:#c0392b;color:#fff}
 .dia-card{background:#fff;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,0.08);padding:12px;cursor:pointer;border:2px solid transparent;transition:border 0.15s}
 .dia-card:hover{border-color:#c0392b}
 .dia-card.fs{background:#fdf5f5}
+.periodo-cerrado{background:#f0faf0;border:1.5px solid #27ae60;border-radius:6px;padding:10px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.periodo-cerrado-label{font-weight:700;font-size:13px;color:#155724}
+.periodo-cerrado-info{font-size:11px;color:#666;margin-top:2px}
 @media(max-width:680px){
   #sidebar{width:54px;min-width:54px}
   .sb-logo-t,.sb-logo-s,.sb-item span:last-child,.sb-foot{display:none}
@@ -79,8 +83,6 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
 </head>
 <body>
 <div id="app">
-
-<!-- SIDEBAR -->
 <div id="sidebar">
   <div class="sb-logo">
     <div class="sb-logo-icon">🚌</div>
@@ -93,25 +95,27 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
     <div class="sb-item" onclick="showPage('liquidacion')"><span class="sb-icon">💰</span><span>Liquidación</span></div>
     <div class="sb-item" onclick="showPage('choferes')"><span class="sb-icon">🚗</span><span>Choferes</span></div>
   </div>
-  <div class="sb-foot">
-    <div class="sb-user">💾 Datos guardados en el navegador</div>
-  </div>
+  <div class="sb-foot"><div class="sb-user">💾 Datos guardados en el navegador</div></div>
 </div>
 
-<!-- MAIN -->
 <div id="main">
 
 <!-- RECORRIDOS -->
 <div id="page-recorridos" class="page active">
   <div class="ph">
     <div><h1>📅 Recorridos</h1><p>Recorridos diarios por chofer</p></div>
-    <div class="mes-nav">
-      <button class="mn-btn" onclick="cambiarMes(-1,'rec')">‹</button>
-      <span class="mes-label" id="rec-mes-label"></span>
-      <button class="mn-btn" onclick="cambiarMes(1,'rec')">›</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="mes-nav">
+        <button class="mn-btn" onclick="cambiarMes(-1,'rec')">‹</button>
+        <span class="mes-label" id="rec-mes-label"></span>
+        <button class="mn-btn" onclick="cambiarMes(1,'rec')">›</button>
+      </div>
+      <button class="btn btn-blue" onclick="exportarRecJPG()">📷 Exportar JPG</button>
     </div>
   </div>
-  <div id="rec-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px"></div>
+  <div id="rec-grid-wrap">
+    <div id="rec-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:10px"></div>
+  </div>
   <div id="rec-modal" style="display:none"></div>
 </div>
 
@@ -119,12 +123,22 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
 <div id="page-extras" class="page">
   <div class="ph">
     <div><h1>📋 Extras</h1><p>Registro de viajes y tarifas</p></div>
-    <div class="mes-nav">
-      <button class="mn-btn" onclick="cambiarMes(-1,'ext')">‹</button>
-      <span class="mes-label" id="ext-mes-label"></span>
-      <button class="mn-btn" onclick="cambiarMes(1,'ext')">›</button>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <div class="mes-nav">
+        <button class="mn-btn" onclick="cambiarMes(-1,'ext')">‹</button>
+        <span class="mes-label" id="ext-mes-label"></span>
+        <button class="mn-btn" onclick="cambiarMes(1,'ext')">›</button>
+      </div>
+      <button class="btn btn-orange" onclick="abrirCierrePeriodo()">🔒 Cerrar período</button>
     </div>
   </div>
+
+  <!-- Períodos cerrados -->
+  <div id="periodos-cerrados-sec" style="display:none">
+    <div style="font-weight:700;font-size:13px;margin-bottom:8px;color:#155724">📁 Períodos cerrados</div>
+    <div id="periodos-lista"></div>
+  </div>
+
   <div class="kpi-grid" id="ext-kpis"></div>
   <div class="card" style="padding:12px 16px">
     <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
@@ -138,7 +152,7 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
   <div class="card" style="padding:0;overflow:hidden">
     <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid #eee;flex-wrap:wrap">
       <button class="btn btn-red" onclick="abrirNuevoExtra()">+ Agregar fila</button>
-      <input type="text" id="ext-busqueda" placeholder="🔍 Buscar chofer o detalle..." style="width:240px" oninput="renderExtras()">
+      <input type="text" id="ext-busqueda" placeholder="🔍 Buscar chofer o detalle..." style="width:240px" oninput="renderExt()">
       <span id="ext-count" style="margin-left:auto;font-size:11px;color:#999"></span>
     </div>
     <div style="overflow-x:auto">
@@ -170,17 +184,16 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
         <button class="mn-btn" onclick="cambiarMes(1,'cron')">›</button>
       </div>
       <button class="btn btn-red" onclick="guardarCronograma()">💾 Guardar</button>
+      <button class="btn btn-blue" onclick="exportarCronJPG()">📷 Exportar JPG</button>
     </div>
   </div>
   <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
-    <span class="badge b-T">T — Trabaja</span>
-    <span class="badge b-F">F — Franco</span>
-    <span class="badge b-G">G — Guardia</span>
-    <span class="badge b-VAC">VAC — Vacaciones</span>
+    <span class="badge b-T">T — Trabaja</span><span class="badge b-F">F — Franco</span>
+    <span class="badge b-G">G — Guardia</span><span class="badge b-VAC">VAC — Vacaciones</span>
     <span class="badge b-LIC">LIC — Licencia</span>
     <span style="font-size:11px;color:#aaa;margin-left:4px">💡 Clic en celda para cambiar</span>
   </div>
-  <div class="card" style="padding:0;overflow:auto;max-height:70vh">
+  <div id="cron-wrap" class="card" style="padding:0;overflow:auto;max-height:70vh">
     <table style="font-size:11px;min-width:900px">
       <thead id="cron-head"></thead>
       <tbody id="cron-body"></tbody>
@@ -196,7 +209,7 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
       <button class="mn-btn" onclick="cambiarMes(-1,'liq')">‹</button>
       <span class="mes-label" id="liq-mes-label"></span>
       <button class="mn-btn" onclick="cambiarMes(1,'liq')">›</button>
-      <button class="btn btn-gray" onclick="renderLiquidacion()" style="margin-left:6px;padding:7px 10px">🔄</button>
+      <button class="btn btn-gray" onclick="renderLiq()" style="margin-left:6px;padding:7px 10px">🔄</button>
     </div>
   </div>
   <div class="kpi-grid" id="liq-kpis"></div>
@@ -234,13 +247,16 @@ th,td{padding:7px 10px;text-align:left;font-size:12px}
 </div><!-- /app -->
 
 <script>
-// ─── STORAGE ───────────────────────────────────────────────
+// ── DATOS INICIALES DEL EXCEL ─────────────────────────────────────────────────
+var DATOS_EXCEL = [{"fecha": "2026-02-25", "chofer": "BOLADO", "hor": "18:00", "det": "RETIRA VENCHE DANIEL", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-02-25", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN Y TORO HECTOR", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-02-26", "chofer": "YANNIBELLI", "hor": "16:00", "det": "TRASLADO DE MARIANO BELLADA DESDE JUNIN AL HOTEL HORIZONTE DE SAN LORENZO", "cx": 0, "tipo": "AUTO", "km": 468.0, "hb": 0, "importe": 232698.96, "total": 232698.96}, {"fecha": "2026-02-26", "chofer": "BOLADO", "hor": "18:00", "det": "RETIRA VENCHE DANIEL", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-02-26", "chofer": "REINA", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN, ARGUELLO, HAILANT SEBASTIAN, ZALAZAR ESTEBAN, RETAMOZO JONA, MACHELLO AGUSTIN, TORO HECTOR, RAGUZA MAXIMO Y FERREYRA SAMUEL", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-02-27", "chofer": "MUGNOLO", "hor": "16:00", "det": "TRASLADO DE PLANTA TIMBUES A JUNIN AL OPERARIO MARIANO BELLADA", "cx": 0, "tipo": "AUTO", "km": 484.0, "hb": 0, "importe": 240654.48, "total": 240654.48}, {"fecha": "2026-02-27", "chofer": "GONZALEZ", "hor": "20:00", "det": "RETIRA TORO HECTOR, FERREYRA SAMUEL, RAGUZA MAXIMO, MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-02-28", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA YASMIN RECALT, VERA THIAGO Y LUCARENA ULISES", "cx": 11293.46, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 32992.04}, {"fecha": "2026-02-28", "chofer": "GONZALEZ", "hor": "20:00", "det": "RETIRA TORO HECTOR, FERREYRA SAMUEL, FIGGINI CRISTIAN, MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-01", "chofer": "REINA", "hor": "10:00", "det": "RETIRA YAZMIN RECALT", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-02", "chofer": "LORONI", "hor": "04:30", "det": "TRASLADO DE GUADALUPE LESCANO DESDE JUNIN AL PGSM", "cx": 0, "tipo": "AUTO", "km": 476.0, "hb": 0, "importe": 236676.72, "total": 236676.72}, {"fecha": "2026-03-02", "chofer": "GONZALEZ", "hor": "09:00", "det": "RETIRA LUGLI JUAN", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-02", "chofer": "GONZALEZ", "hor": "18:00", "det": "INGRESA GONZALEZ MATIAS - RETIRA VIALE WALDO", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-03-02", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA TORO HECTOR Y MACHELLO AGUSTIN", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-03-03", "chofer": "PESOINBOURE", "hor": "07:30", "det": "TRASLADO DESDE JUNIN A BALCARCE AL OPERARIO DIEGO RODRIGUEZ TERRONES", "cx": 0, "tipo": "AUTO", "km": 980.0, "hb": 0, "importe": 487275.6, "total": 487275.6}, {"fecha": "2026-03-03", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA GONZALEZ MATIAS", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-03", "chofer": "REINA", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN, TORO HECTOR, MACHELLO AGUSTIN, FERREYRA SAMUEL Y HISSIRIBEHERE GIANFRANCO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-04", "chofer": "BOLADO", "hor": "15:00", "det": "RETIRA VIALE WALDO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-04", "chofer": "GONZALEZ", "hor": "18:00", "det": "RETIRA HISSIRIBEHERE GIANFRANCO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-04", "chofer": "GONZALEZ", "hor": "20:00", "det": "RETIRA RAGUZA MAXIMO, TORO HECTOR Y FERREYRA SAMUEL", "cx": 11293.46, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 32992.04}, {"fecha": "2026-03-05", "chofer": "YEBER", "hor": "12:30", "det": "TRASLADO DESDE VILLEGAS A JUNIN AL OPERARIO RODRIGUEZ TERRONES DIEGO", "cx": 0, "tipo": "AUTO", "km": 412.0, "hb": 0, "importe": 204854.64, "total": 204854.64}, {"fecha": "2026-03-05", "chofer": "REINA", "hor": "18:00", "det": "INGRESA HISSIRIBEHERE GIANFRANCO - RETIRA BEVILACKUA BENJAMIN, FERREYRA SAMUEL, ZALAZAR BRUNO Y MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-05", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA FIGGINI CRISTIAN, RAGUZA MAXIMO Y TORO HECTOR", "cx": 11293.46, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 32992.04}, {"fecha": "2026-03-06", "chofer": "TOLEDO", "hor": "08:30", "det": "TRASLADOS DE LOS OPERARIOS VAZQUE ALEXIS Y ALTAMIRANO LEONARDO DESDE JUNIN A SAN NICOLAS - CON ESPERA", "cx": 0, "tipo": "AUTO", "km": 330.0, "hb": 9.0, "importe": 198360.0, "total": 198360.0}, {"fecha": "2026-03-06", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA SANCHEZ DIEGO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-06", "chofer": "GONZALEZ", "hor": "18:00", "det": "RETIRA RAGUZA MAXIMO, HISSIRIBEHERE GIANFRANCO, TORO HECTOR, FIGGINI CRISTIAN, ZALAZAR BRUNO Y VUGLIOTTI WALTER", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-06", "chofer": "BOLADO", "hor": "20:00", "det": "RETIRA FERREYRA SAMUEL", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-07", "chofer": "REINA", "hor": "10:00", "det": "RETIRA LUCARENA ULISES, VERA THIAGO, MELVIHILL Y PALOMINO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-07", "chofer": "BOLADO", "hor": "18:00", "det": "INGRESA ROZUADONSQUEY CLARA - RETIRA ROMERO MARIA", "cx": 5646.73, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 27345.31}, {"fecha": "2026-03-07", "chofer": "REINA", "hor": "20:00", "det": "RETIRA RAGUZA MAXIMO, ZALAZAR BRUNO, FERREYRA SAMUEL, TORO HECTOR Y MACHELLO AGUSTIN", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-08", "chofer": "BOLADO", "hor": "02:00", "det": "RETIRA CLARA ROZUADONSQUEY", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-08", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA SANCHEZ DIEGO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-08", "chofer": "BOLADO", "hor": "18:00", "det": "RETIRA TALLARICO NICOLAS", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-09", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA SANCHEZ DIEGO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-09", "chofer": "REINA", "hor": "19:00", "det": "INGRESA TORO HECTOR", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-10", "chofer": "MEDINA", "hor": "05:00", "det": "TRASLADO DESDE JUNIN A TIMBUES A LA OPERARIO IGLESIAS GISELA - CON ESPERA", "cx": 0, "tipo": "AUTO", "km": 484.0, "hb": 8.0, "importe": 271123.28, "total": 271123.28}, {"fecha": "2026-03-10", "chofer": "REINA", "hor": "18:00", "det": "INGRESA TORO HECTOR", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-10", "chofer": "BARRERA", "hor": "20:00", "det": "RETIRA RAGUSA MAXIMO, MACHELLO AGUSTIN, HAILANT SEBASTIAN, CERUNDULO DAVID, ARGUELLO FRANCO, OREJON FRANCO, MONSON NICOLAS Y RODRIGUEZ RENSO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}, {"fecha": "2026-03-11", "chofer": "BARRERA", "hor": "02:00", "det": "INGRESA MONZON ELIO", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-11", "chofer": "BOLADO", "hor": "10:00", "det": "RETIRA AGUIRRE RAMON", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-11", "chofer": "BOLADO", "hor": "18:00", "det": "INGRESA TORO HECTOR", "cx": 0, "tipo": "AUTO", "km": 0, "hb": 0, "importe": 21698.58, "total": 21698.58}, {"fecha": "2026-03-11", "chofer": "BARRERA", "hor": "20:00", "det": "RETIRA PALOMERO BAUTISTA, BEVILACKUA BENJAMIN, FERREYRA SAMUEL Y OREJON FRANCO", "cx": 0, "tipo": "COMBI", "km": 0, "hb": 0, "importe": 43397.16, "total": 43397.16}];
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
 var DB={
   load:function(k){try{return JSON.parse(localStorage.getItem('cofco_'+k)||'null')}catch(e){return null}},
-  save:function(k,v){try{localStorage.setItem('cofco_'+k,JSON.stringify(v))}catch(e){alert('No se pudo guardar: '+e.message)}}
+  save:function(k,v){try{localStorage.setItem('cofco_'+k,JSON.stringify(v))}catch(e){alert('Error guardando: '+e.message)}}
 };
 
-// ─── STATE ─────────────────────────────────────────────────
+// ── STATE ─────────────────────────────────────────────────────────────────────
 var S={
   recMes:new Date().getMonth(), recAnio:new Date().getFullYear(),
   extMes:new Date().getMonth(), extAnio:new Date().getFullYear(),
@@ -260,24 +276,55 @@ function mesKey(m,a){return a+'-'+(m<9?'0'+(m+1):(m+1))}
 function diasMes(m,a){return new Date(a,m+1,0).getDate()}
 function mesStr(m,a){return MESES[m]+' '+a}
 
-// ─── DATA GETTERS ──────────────────────────────────────────
+// ── DATA ──────────────────────────────────────────────────────────────────────
 function getChos(){return DB.load('choferes')||[
-  {id:'c1',ap:'GONZALEZ',nom:'ALICIO',tipo:'auto',activo:true},
-  {id:'c2',ap:'REINA',nom:'SEBASTIAN',tipo:'auto',activo:true},
-  {id:'c3',ap:'BOLADO',nom:'JOSE',tipo:'combi',activo:true},
-  {id:'c4',ap:'BARRERA',nom:'MARCELO',tipo:'auto',activo:true}
+  {id:'c1',ap:'GONZALEZ',nom:'ALICIO',tipo:'combi',activo:true},
+  {id:'c2',ap:'REINA',nom:'SEBASTIAN',tipo:'combi',activo:true},
+  {id:'c3',ap:'BOLADO',nom:'JOSE',tipo:'auto',activo:true},
+  {id:'c4',ap:'BARRERA',nom:'MARCELO',tipo:'combi',activo:true},
+  {id:'c5',ap:'YANNIBELLI',nom:'',tipo:'auto',activo:true},
+  {id:'c6',ap:'MUGNOLO',nom:'',tipo:'auto',activo:true},
+  {id:'c7',ap:'LORONI',nom:'',tipo:'auto',activo:true},
+  {id:'c8',ap:'PESOINBOURE',nom:'',tipo:'auto',activo:true},
+  {id:'c9',ap:'YEBER',nom:'',tipo:'auto',activo:true},
+  {id:'c10',ap:'TOLEDO',nom:'',tipo:'auto',activo:true},
+  {id:'c11',ap:'MEDINA',nom:'',tipo:'auto',activo:true}
 ]}
 function getPers(){return DB.load('personal')||[]}
 function getTar(){return DB.load('tarifas')||{km:497.22,esp:5805.20,auto:21698.58,combi:43397.16}}
 function getExt(){return DB.load('extras')||[]}
 function getRecs(){return DB.load('recorridos')||[]}
 function getCron(){return DB.load('cronograma')||{}}
+function getPeriodos(){return DB.load('periodos')||[]}
 
-function calcImp(e,t){
-  return (e.tipo==='COMBI'?t.combi:t.auto)+(e.km||0)*t.km+(e.hb||0)*t.esp;
+function calcImp(e,t){return (e.tipo==='COMBI'?t.combi:t.auto)+(e.km||0)*t.km+(e.hb||0)*t.esp}
+
+// ── IMPORTAR EXCEL AL INICIAR ─────────────────────────────────────────────────
+function importarDatosExcel(){
+  if(DB.load('excel_importado')) return; // ya importado
+  var exts = getExt();
+  var t = getTar();
+  DATOS_EXCEL.forEach(function(r){
+    var anio = parseInt(r.fecha.split('-')[0]);
+    var mes  = parseInt(r.fecha.split('-')[1])-1;
+    exts.push({
+      id: uid(),
+      m: mes, a: anio,
+      fecha: r.fecha,
+      chId: '', chNom: r.chofer,
+      hor: r.hor,
+      det: r.det,
+      tipo: r.tipo === 'COMBI' ? 'COMBI' : 'AUTO',
+      cx: r.cx||0,
+      km: r.km||0,
+      hb: r.hb||0
+    });
+  });
+  DB.save('extras', exts);
+  DB.save('excel_importado', true);
 }
 
-// ─── NAVEGACIÓN ────────────────────────────────────────────
+// ── NAVEGACIÓN ────────────────────────────────────────────────────────────────
 function showPage(p){
   document.querySelectorAll('.page').forEach(function(el){el.classList.remove('active')});
   document.querySelectorAll('.sb-item').forEach(function(el){el.classList.remove('active')});
@@ -286,7 +333,6 @@ function showPage(p){
   document.querySelectorAll('.sb-item')[ord.indexOf(p)].classList.add('active');
   ({recorridos:renderRec,extras:renderExt,cronograma:renderCron,liquidacion:renderLiq,choferes:renderChos})[p]();
 }
-
 function cambiarMes(d,mod){
   var mk=mod+'Mes',ak=mod+'Anio';
   S[mk]+=d;
@@ -295,7 +341,7 @@ function cambiarMes(d,mod){
   ({rec:renderRec,ext:renderExt,cron:renderCron,liq:renderLiq})[mod]();
 }
 
-// ─── RECORRIDOS ────────────────────────────────────────────
+// ── RECORRIDOS ────────────────────────────────────────────────────────────────
 function renderRec(){
   var m=S.recMes,a=S.recAnio;
   document.getElementById('rec-mes-label').textContent=mesStr(m,a).toUpperCase();
@@ -323,6 +369,17 @@ function renderRec(){
   document.getElementById('rec-grid').innerHTML=html;
 }
 
+function exportarRecJPG(){
+  var el=document.getElementById('rec-grid-wrap');
+  var lbl=document.getElementById('rec-mes-label').textContent;
+  html2canvas(el,{scale:2,backgroundColor:'#f4f4f7',useCORS:true}).then(function(canvas){
+    var a=document.createElement('a');
+    a.download='Recorridos_'+lbl.replace(/ /g,'_')+'.jpg';
+    a.href=canvas.toDataURL('image/jpeg',0.92);
+    a.click();
+  });
+}
+
 function abrirDia(d){
   var m=S.recMes,a=S.recAnio;
   var recs=getRecs().filter(function(r){return r.m===m&&r.a===a&&r.d===d});
@@ -345,13 +402,11 @@ function abrirDia(d){
   }
   html+='</div></div></div>';
   var modal=document.getElementById('rec-modal');
-  modal.innerHTML=html;
-  modal.style.display='block';
-  modal._d=d;
+  modal.innerHTML=html;modal.style.display='block';modal._d=d;
 }
 
 function bloqueChofer(r,ch){
-  var html='<div class="cho-bloque" id="rb-'+r.id+'">';
+  var html='<div class="cho-bloque">';
   html+='<div class="cho-bloque-header">';
   html+='<span class="cho-bloque-nombre">'+(ch?ch.ap+' '+ch.nom:'?')+'</span>';
   html+='<div style="display:flex;align-items:center;gap:8px">';
@@ -375,56 +430,17 @@ function bloqueChofer(r,ch){
   return html;
 }
 
-function addChoferDia(d){
-  var sel=document.getElementById('sel-cho');
-  if(!sel||!sel.value)return;
-  var recs=getRecs();
-  recs.push({id:uid(),m:S.recMes,a:S.recAnio,d:d,cid:sel.value,turnos:[{hi:'',hf:'',det:''}],franco:false,notas:''});
-  DB.save('recorridos',recs);abrirDia(d);
-}
-function addTurno(rid){
-  var recs=getRecs(),r=recs.find(function(x){return x.id===rid});
-  if(r){r.turnos=r.turnos||[];r.turnos.push({hi:'',hf:'',det:''});}
-  DB.save('recorridos',recs);
-  abrirDia(document.getElementById('rec-modal')._d);
-}
-function delTurno(rid,i){
-  var recs=getRecs(),r=recs.find(function(x){return x.id===rid});
-  if(r&&r.turnos)r.turnos.splice(i,1);
-  DB.save('recorridos',recs);
-  abrirDia(document.getElementById('rec-modal')._d);
-}
-function editT(rid,i,k,v){
-  var recs=getRecs(),r=recs.find(function(x){return x.id===rid});
-  if(r&&r.turnos&&r.turnos[i])r.turnos[i][k]=v;
-  DB.save('recorridos',recs);
-}
-function editNotas(rid,v){
-  var recs=getRecs(),r=recs.find(function(x){return x.id===rid});
-  if(r)r.notas=v;DB.save('recorridos',recs);
-}
-function toggleFranco(rid){
-  var recs=getRecs(),r=recs.find(function(x){return x.id===rid});
-  if(r)r.franco=!r.franco;
-  DB.save('recorridos',recs);
-  abrirDia(document.getElementById('rec-modal')._d);
-}
-function delRec(rid){
-  if(!confirm('¿Eliminar este chofer del día?'))return;
-  DB.save('recorridos',getRecs().filter(function(r){return r.id!==rid}));
-  abrirDia(document.getElementById('rec-modal')._d);
-}
-function copiarDia(d){
-  var m=S.recMes,a=S.recAnio,recs=getRecs();
-  var orig=recs.filter(function(r){return r.m===m&&r.a===a&&r.d===d-1});
-  var filtrado=recs.filter(function(r){return !(r.m===m&&r.a===a&&r.d===d)});
-  var nuevos=orig.map(function(r){return Object.assign({},r,{id:uid(),d:d,turnos:(r.turnos||[]).map(function(t){return Object.assign({},t)})})});
-  DB.save('recorridos',filtrado.concat(nuevos));
-  abrirDia(d);
-}
+function addChoferDia(d){var sel=document.getElementById('sel-cho');if(!sel||!sel.value)return;var recs=getRecs();recs.push({id:uid(),m:S.recMes,a:S.recAnio,d:d,cid:sel.value,turnos:[{hi:'',hf:'',det:''}],franco:false,notas:''});DB.save('recorridos',recs);abrirDia(d)}
+function addTurno(rid){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r){r.turnos=r.turnos||[];r.turnos.push({hi:'',hf:'',det:''})}DB.save('recorridos',recs);abrirDia(document.getElementById('rec-modal')._d)}
+function delTurno(rid,i){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r&&r.turnos)r.turnos.splice(i,1);DB.save('recorridos',recs);abrirDia(document.getElementById('rec-modal')._d)}
+function editT(rid,i,k,v){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r&&r.turnos&&r.turnos[i])r.turnos[i][k]=v;DB.save('recorridos',recs)}
+function editNotas(rid,v){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r)r.notas=v;DB.save('recorridos',recs)}
+function toggleFranco(rid){var recs=getRecs(),r=recs.find(function(x){return x.id===rid});if(r)r.franco=!r.franco;DB.save('recorridos',recs);abrirDia(document.getElementById('rec-modal')._d)}
+function delRec(rid){if(!confirm('¿Eliminar?'))return;DB.save('recorridos',getRecs().filter(function(r){return r.id!==rid}));abrirDia(document.getElementById('rec-modal')._d)}
+function copiarDia(d){var m=S.recMes,a=S.recAnio,recs=getRecs();var orig=recs.filter(function(r){return r.m===m&&r.a===a&&r.d===d-1});var filtrado=recs.filter(function(r){return !(r.m===m&&r.a===a&&r.d===d)});var nuevos=orig.map(function(r){return Object.assign({},r,{id:uid(),d:d,turnos:(r.turnos||[]).map(function(t){return Object.assign({},t)})})});DB.save('recorridos',filtrado.concat(nuevos));abrirDia(d)}
 function cerrarRec(){document.getElementById('rec-modal').style.display='none';renderRec()}
 
-// ─── EXTRAS ────────────────────────────────────────────────
+// ── EXTRAS ────────────────────────────────────────────────────────────────────
 function renderExt(){
   var m=S.extMes,a=S.extAnio;
   document.getElementById('ext-mes-label').textContent=mesStr(m,a).toUpperCase();
@@ -433,11 +449,36 @@ function renderExt(){
   document.getElementById('t-esp').value=t.esp;
   document.getElementById('t-auto').value=t.auto;
   document.getElementById('t-combi').value=t.combi;
+
+  // Períodos cerrados
+  var periodos=getPeriodos().filter(function(p){return p.anio===a&&p.mes===m});
+  var secP=document.getElementById('periodos-cerrados-sec');
+  var listaP=document.getElementById('periodos-lista');
+  if(periodos.length){
+    secP.style.display='block';
+    var ph='';
+    periodos.forEach(function(p){
+      ph+='<div class="periodo-cerrado">';
+      ph+='<div><div class="periodo-cerrado-label">🔒 '+p.label+'</div>';
+      ph+='<div class="periodo-cerrado-info">'+p.registros+' registros · Total: '+fmtP(p.total)+' · Cerrado el '+p.fechaCierre+'</div></div>';
+      ph+='<button class="btn btn-green" onclick="exportarPeriodoExcel(\''+p.id+'\')">📥 Excel</button></div>';
+    });
+    listaP.innerHTML=ph;
+  } else {
+    secP.style.display='none';
+  }
+
+  // Filtrar extras NO cerrados del mes actual
+  var cerradosIds=[];
+  getPeriodos().filter(function(p){return p.anio===a&&p.mes===m}).forEach(function(p){cerradosIds=cerradosIds.concat(p.extIds||[])});
+
   var bus=(document.getElementById('ext-busqueda').value||'').toLowerCase();
   var exts=getExt().filter(function(e){
-    return e.m===m&&e.a===a&&(!bus||(e.chNom||'').toLowerCase().includes(bus)||(e.det||'').toLowerCase().includes(bus));
+    return e.m===m&&e.a===a&&cerradosIds.indexOf(e.id)<0&&
+      (!bus||(e.chNom||'').toLowerCase().includes(bus)||(e.det||'').toLowerCase().includes(bus));
   });
-  document.getElementById('ext-count').textContent=exts.length+' registros';
+
+  document.getElementById('ext-count').textContent=exts.length+' registros abiertos';
   var tot={v:0,km:0,esp:0,cx:0,tot:0};
   exts.forEach(function(e){tot.v++;tot.km+=(e.km||0);tot.esp+=(e.hb||0);tot.cx+=(e.cx||0);tot.tot+=calcImp(e,t)+(e.cx||0)});
   document.getElementById('ext-kpis').innerHTML=
@@ -446,6 +487,7 @@ function renderExt(){
     '<div class="kpi naranja"><div class="kpi-val">'+tot.esp.toFixed(1)+'</div><div class="kpi-lbl">Hs Espera</div></div>'+
     '<div class="kpi rojo"><div class="kpi-val">'+fmtP(tot.cx)+'</div><div class="kpi-lbl">Costo Ext. Pasaje</div></div>'+
     '<div class="kpi verde"><div class="kpi-val">'+fmtP(tot.tot)+'</div><div class="kpi-lbl">Total General</div></div>';
+
   var html='';
   exts.forEach(function(e,i){
     var imp=calcImp(e,t),tot2=imp+(e.cx||0);
@@ -454,7 +496,7 @@ function renderExt(){
     html+='<td>'+e.fecha+'</td>';
     html+='<td style="font-weight:700;color:#c0392b">'+(e.chNom||'')+'</td>';
     html+='<td>'+e.hor+'</td>';
-    html+='<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#444">'+e.det+'</td>';
+    html+='<td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#444">'+e.det+'</td>';
     html+='<td style="color:'+(e.cx>0?'#c0392b':'#bbb')+'">'+(e.cx>0?fmtP(e.cx):'—')+'</td>';
     html+='<td><span style="background:'+(e.tipo==='COMBI'?'#dcfce7':'#dbeafe')+';color:'+(e.tipo==='COMBI'?'#166534':'#1e40af')+';padding:2px 7px;border-radius:4px;font-size:10px;font-weight:700">'+e.tipo+'</span></td>';
     html+='<td>'+(e.km>0?e.km:'—')+'</td>';
@@ -485,9 +527,12 @@ function abrirModalExt(e){
   html+='<label style="font-size:11px;font-weight:700">HORARIO<br><input type="time" id="ef-hor" value="'+(e?e.hor:'')+'" style="width:100%"></label>';
   html+='<label style="font-size:11px;font-weight:700">CHOFER<br><select id="ef-cho" style="width:100%"><option value="">— Seleccionar —</option>';
   chos.forEach(function(c){html+='<option value="'+c.id+'"'+(e&&e.chId===c.id?' selected':'')+'>'+c.ap+' '+c.nom+'</option>'});
+  html+='<option value="_manual"'+(e&&!e.chId?' selected':'')+'>✏️ Escribir nombre</option>';
   html+='</select></label>';
   html+='<label style="font-size:11px;font-weight:700">TIPO<br><select id="ef-tipo" style="width:100%"><option value="AUTO"'+(e&&e.tipo==='AUTO'?' selected':'')+'>AUTO</option><option value="COMBI"'+(e&&e.tipo==='COMBI'?' selected':'')+'>COMBI</option></select></label>';
   html+='</div>';
+  html+='<div id="ef-cho-manual-wrap" style="display:'+(e&&!e.chId?'block':'none')+'">';
+  html+='<label style="font-size:11px;font-weight:700">NOMBRE CHOFER (manual)<br><input type="text" id="ef-cho-manual" value="'+(e&&!e.chId?e.chNom||'':'')+'" style="width:100%"></label></div>';
   html+='<label style="font-size:11px;font-weight:700">DETALLE<br><input type="text" id="ef-det" value="'+(e?e.det:'')+'" placeholder="Descripción del viaje..." style="width:100%"></label>';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">';
   html+='<label style="font-size:11px;font-weight:700">COSTO EXT. PASAJE<br><input type="number" id="ef-cx" value="'+(e?e.cx:0)+'" step="0.01" style="width:100%"></label>';
@@ -500,16 +545,23 @@ function abrirModalExt(e){
   html+='</div></div></div>';
   document.getElementById('ext-modal').innerHTML=html;
   document.getElementById('ext-modal').style.display='block';
+  document.getElementById('ef-cho').addEventListener('change',function(){
+    document.getElementById('ef-cho-manual-wrap').style.display=this.value==='_manual'?'block':'none';
+  });
 }
 
 function guardarExt(id){
-  var chId=document.getElementById('ef-cho').value;
-  if(!chId||!document.getElementById('ef-fecha').value||!document.getElementById('ef-det').value)return alert('Completar fecha, chofer y detalle');
-  var ch=getChos().find(function(c){return c.id===chId});
+  var chSel=document.getElementById('ef-cho').value;
+  var chId='',chNom='';
+  if(chSel==='_manual'){chNom=(document.getElementById('ef-cho-manual').value||'').toUpperCase()}
+  else if(chSel){var ch=getChos().find(function(c){return c.id===chSel});chId=chSel;chNom=ch?ch.ap:''}
+  else{return alert('Seleccionar chofer')}
+  if(!document.getElementById('ef-fecha').value||!document.getElementById('ef-det').value)return alert('Completar fecha y detalle');
   var exts=getExt();
-  var obj={id:id||uid(),m:S.extMes,a:S.extAnio,
-    fecha:document.getElementById('ef-fecha').value,
-    chId:chId,chNom:ch?ch.ap:'?',
+  var fv=document.getElementById('ef-fecha').value;
+  var obj={id:id||uid(),
+    m:parseInt(fv.split('-')[1])-1,a:parseInt(fv.split('-')[0]),
+    fecha:fv,chId:chId,chNom:chNom,
     hor:document.getElementById('ef-hor').value,
     det:document.getElementById('ef-det').value,
     tipo:document.getElementById('ef-tipo').value,
@@ -517,21 +569,135 @@ function guardarExt(id){
     km:parseFloat(document.getElementById('ef-km').value)||0,
     hb:parseFloat(document.getElementById('ef-hb').value)||0
   };
-  if(id){var i=exts.findIndex(function(e){return e.id===id});if(i>=0)exts[i]=obj}
-  else exts.push(obj);
+  if(id){var i=exts.findIndex(function(e){return e.id===id});if(i>=0)exts[i]=obj}else exts.push(obj);
   DB.save('extras',exts);cerrarExt();
 }
 function delExt(id){if(!confirm('¿Eliminar?'))return;DB.save('extras',getExt().filter(function(e){return e.id!==id}));renderExt()}
 function cerrarExt(){document.getElementById('ext-modal').style.display='none';renderExt()}
 
-// ─── CRONOGRAMA ────────────────────────────────────────────
+// ── CIERRE DE PERÍODO ─────────────────────────────────────────────────────────
+function abrirCierrePeriodo(){
+  var m=S.extMes,a=S.extAnio;
+  // Fechas límite del mes
+  var primerDia=a+'-'+String(m+1).padStart(2,'0')+'-01';
+  var ultimoDia=a+'-'+String(m+1).padStart(2,'0')+'-'+String(diasMes(m,a)).padStart(2,'0');
+
+  var html='<div class="overlay" onclick="if(event.target===this)this.parentNode.style.display=\'none\'">';
+  html+='<div class="modal"><div class="modal-top"><h2>🔒 Cerrar período</h2>';
+  html+='<button onclick="document.getElementById(\'cierre-modal\').style.display=\'none\'" style="background:none;border:none;font-size:22px;cursor:pointer">✕</button></div>';
+  html+='<div class="modal-body">';
+  html+='<p style="font-size:13px;color:#555">Seleccioná el rango de fechas a cerrar. Los registros de ese período quedarán <b>bloqueados</b> y podrás exportarlos a Excel.</p>';
+  html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">';
+  html+='<label style="font-size:11px;font-weight:700">FECHA DESDE<br><input type="date" id="cp-desde" value="'+primerDia+'" style="width:100%"></label>';
+  html+='<label style="font-size:11px;font-weight:700">FECHA HASTA<br><input type="date" id="cp-hasta" value="'+ultimoDia+'" style="width:100%"></label>';
+  html+='</div>';
+  html+='<label style="font-size:11px;font-weight:700">NOMBRE DEL PERÍODO (ej: 1ra quincena marzo)<br><input type="text" id="cp-label" value="'+MESES[m]+' '+a+'" style="width:100%"></label>';
+  html+='<div id="cp-preview" style="background:#f4f4f7;border-radius:6px;padding:10px;font-size:12px;color:#555">Seleccioná las fechas para ver el preview</div>';
+  html+='<div style="display:flex;gap:8px;justify-content:flex-end">';
+  html+='<button class="btn btn-orange" onclick="previewCierre()">👁 Preview</button>';
+  html+='<button class="btn btn-red" onclick="confirmarCierre()">🔒 Confirmar cierre</button>';
+  html+='<button class="btn btn-gray" onclick="document.getElementById(\'cierre-modal\').style.display=\'none\'">Cancelar</button></div>';
+  html+='</div></div></div>';
+
+  var modal=document.getElementById('cierre-modal');
+  if(!modal){modal=document.createElement('div');modal.id='cierre-modal';document.body.appendChild(modal)}
+  modal.innerHTML=html;modal.style.display='block';
+}
+
+function getExtsPeriodo(){
+  var desde=document.getElementById('cp-desde').value;
+  var hasta=document.getElementById('cp-hasta').value;
+  return getExt().filter(function(e){return e.fecha>=desde&&e.fecha<=hasta});
+}
+
+function previewCierre(){
+  var exts=getExtsPeriodo();
+  var t=getTar();
+  var tot=exts.reduce(function(s,e){return s+calcImp(e,t)+(e.cx||0)},0);
+  document.getElementById('cp-preview').innerHTML=
+    '<b>'+exts.length+' registros</b> en el período · Total: <b style="color:#27ae60">'+fmtP(tot)+'</b>';
+}
+
+function confirmarCierre(){
+  var exts=getExtsPeriodo();
+  if(!exts.length)return alert('No hay registros en ese período');
+  if(!confirm('¿Cerrar este período? Los registros quedarán bloqueados.'))return;
+  var t=getTar();
+  var tot=exts.reduce(function(s,e){return s+calcImp(e,t)+(e.cx||0)},0);
+  var desde=document.getElementById('cp-desde').value;
+  var hasta=document.getElementById('cp-hasta').value;
+  var label=document.getElementById('cp-label').value||desde+' al '+hasta;
+  var hoy=new Date().toLocaleDateString('es-AR');
+  var periodos=getPeriodos();
+  var pid=uid();
+  periodos.push({
+    id:pid,
+    label:label,
+    desde:desde,hasta:hasta,
+    mes:parseInt(desde.split('-')[1])-1,
+    anio:parseInt(desde.split('-')[0]),
+    registros:exts.length,
+    total:tot,
+    fechaCierre:hoy,
+    extIds:exts.map(function(e){return e.id}),
+    snapshot:exts.map(function(e){return Object.assign({},e,{_imp:calcImp(e,t),_tot:calcImp(e,t)+(e.cx||0)})})
+  });
+  DB.save('periodos',periodos);
+  document.getElementById('cierre-modal').style.display='none';
+  alert('✅ Período "'+label+'" cerrado correctamente.');
+  renderExt();
+}
+
+function exportarPeriodoExcel(pid){
+  var p=getPeriodos().find(function(x){return x.id===pid});
+  if(!p)return;
+  var wb=XLSX.utils.book_new();
+  var cabecera=[['FECHA','CHOFER','HORARIO','DETALLE','COSTO EXT. POR PASAJERO','MOVIL','KM','HS ESPERA','IMPORTE','IMPORTE TOTAL']];
+  var filas=p.snapshot.map(function(e){return[
+    e.fecha, e.chNom||'', e.hor, e.det,
+    e.cx||0, e.tipo, e.km||0, e.hb||0,
+    e._imp, e._tot
+  ]});
+  // Fila de totales
+  var t=getTar();
+  var totales=[
+    '','','','TOTALES',
+    p.snapshot.reduce(function(s,e){return s+(e.cx||0)},0),'',
+    p.snapshot.reduce(function(s,e){return s+(e.km||0)},0),
+    p.snapshot.reduce(function(s,e){return s+(e.hb||0)},0),
+    p.snapshot.reduce(function(s,e){return s+e._imp},0),
+    p.total
+  ];
+  var data=cabecera.concat(filas).concat([totales]);
+  var ws=XLSX.utils.aoa_to_sheet(data);
+  // Anchos de columna
+  ws['!cols']=[{wch:12},{wch:16},{wch:10},{wch:60},{wch:18},{wch:8},{wch:8},{wch:10},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb,ws,'Extras');
+  // Hoja resumen
+  var resumen=[
+    ['PERÍODO',p.label],
+    ['DESDE',p.desde],['HASTA',p.hasta],
+    ['REGISTROS',p.registros],
+    ['TOTAL GENERAL',p.total],
+    ['FECHA DE CIERRE',p.fechaCierre],
+    ['',''],
+    ['TARIFAS VIGENTES',''],
+    ['$/KM',t.km],['$/H ESPERA',t.esp],
+    ['BASE AUTO',t.auto],['BASE COMBI',t.combi]
+  ];
+  var wsR=XLSX.utils.aoa_to_sheet(resumen);
+  wsR['!cols']=[{wch:20},{wch:20}];
+  XLSX.utils.book_append_sheet(wb,wsR,'Resumen');
+  XLSX.writeFile(wb,'COFCO_Extras_'+p.label.replace(/[^a-zA-Z0-9]/g,'_')+'.xlsx');
+}
+
+// ── CRONOGRAMA ────────────────────────────────────────────────────────────────
 function setCronTipo(t){
   S.cronTipo=t;
   document.getElementById('ct-chofer').className='tab-btn'+(t==='chofer'?' active':'');
   document.getElementById('ct-personal').className='tab-btn'+(t==='personal'?' active':'');
   renderCron();
 }
-
 var CRON_COL={T:'#d4edda',F:'#fff3cd',G:'#cce5ff',VAC:'#e2d9f3',LIC:'#f8d7da'};
 var CRON_TXT={T:'#155724',F:'#856404',G:'#004085',VAC:'#6f42c1',LIC:'#721c24'};
 
@@ -558,7 +724,7 @@ function renderCron(){
   var body='';
   personas.forEach(function(p){
     body+='<tr>';
-    body+='<td style="font-weight:700;font-size:11px;padding:5px 10px;background:#fff;position:sticky;left:0;z-index:1;border-right:2px solid #eee;white-space:nowrap">'+p.ap+' '+p.nom.charAt(0)+'.</td>';
+    body+='<td style="font-weight:700;font-size:11px;padding:5px 10px;background:#fff;position:sticky;left:0;z-index:1;border-right:2px solid #eee;white-space:nowrap">'+p.ap+(p.nom?' '+p.nom.charAt(0)+'.':'')+'</td>';
     var cT=0,cF=0,cV=0;
     for(var d=1;d<=nd;d++){
       var est=cronMat[p.id][d]||'T';
@@ -578,8 +744,7 @@ function ciclar(pid,d){
   var cron=getCron(),key=S.cronTipo+'-'+mesKey(S.cronMes,S.cronAnio);
   if(!cron[key])cron[key]={};if(!cron[key][pid])cron[key][pid]={};
   cron[key][pid][d]=cronMat[pid][d];
-  DB.save('cronograma',cron);
-  renderCron();
+  DB.save('cronograma',cron);renderCron();
 }
 
 function guardarCronograma(){
@@ -590,7 +755,21 @@ function guardarCronograma(){
   alert('✅ Cronograma guardado correctamente');
 }
 
-// ─── LIQUIDACION ───────────────────────────────────────────
+function exportarCronJPG(){
+  var el=document.getElementById('cron-wrap');
+  var lbl=document.getElementById('cron-mes-label').textContent;
+  var tipo=S.cronTipo==='chofer'?'Choferes':'Personal';
+  // Scroll al inicio para captura completa
+  el.scrollLeft=0;el.scrollTop=0;
+  html2canvas(el,{scale:2,backgroundColor:'#ffffff',useCORS:true,scrollX:0,scrollY:0,width:el.scrollWidth,height:el.scrollHeight}).then(function(canvas){
+    var a=document.createElement('a');
+    a.download='Cronograma_'+tipo+'_'+lbl.replace(/ /g,'_')+'.jpg';
+    a.href=canvas.toDataURL('image/jpeg',0.92);
+    a.click();
+  });
+}
+
+// ── LIQUIDACION ───────────────────────────────────────────────────────────────
 function renderLiq(){
   var m=S.liqMes,a=S.liqAnio;
   document.getElementById('liq-mes-label').textContent=mesStr(m,a).toUpperCase();
@@ -638,7 +817,7 @@ function renderLiq(){
     html+='<span style="color:#ccc;font-size:14px">'+(exp?'▲':'▼')+'</span></div></div>';
     if(exp){
       html+='<div style="padding:12px 18px">';
-      if(!l.det.length){html+='<p style="color:#bbb;font-size:12px">Sin recorridos cargados para este mes.</p>'}
+      if(!l.det.length){html+='<p style="color:#bbb;font-size:12px">Sin recorridos cargados.</p>'}
       else{
         html+='<table style="font-size:12px"><thead><tr style="background:#f4f4f7"><th>Día</th><th>Turno</th><th>Horas</th></tr></thead><tbody>';
         l.det.forEach(function(d){
@@ -665,10 +844,9 @@ function renderLiq(){
   });
   document.getElementById('liq-lista').innerHTML=html||'<div class="card" style="text-align:center;padding:30px;color:#ccc">Sin choferes activos</div>';
 }
-
 function toggleLiq(id){S.liqExp=S.liqExp===id?null:id;renderLiq()}
 
-// ─── CHOFERES ──────────────────────────────────────────────
+// ── CHOFERES ──────────────────────────────────────────────────────────────────
 function renderChos(){
   var chs=getChos(),html='';
   chs.forEach(function(c){
@@ -678,7 +856,7 @@ function renderChos(){
     html+='<td><span class="badge '+(c.activo?'b-T':'b-F')+'">'+(c.activo?'Activo':'Inactivo')+'</span></td>';
     html+='<td><button onclick="abrirModalPersona(\''+c.id+'\',\'chofer\')" style="background:none;border:none;cursor:pointer">✏️</button> <button onclick="toggleActivo(\''+c.id+'\',\'chofer\')" style="background:none;border:none;cursor:pointer;font-size:15px">'+(c.activo?'🔴':'🟢')+'</button></td></tr>';
   });
-  document.getElementById('cho-tbody').innerHTML=html||'<tr><td colspan="4" style="text-align:center;padding:20px;color:#ccc">Sin choferes. Agregá uno.</td></tr>';
+  document.getElementById('cho-tbody').innerHTML=html;
   var pers=getPers(),phtml='';
   pers.forEach(function(p){
     phtml+='<tr style="border-bottom:1px solid #eee">';
@@ -687,7 +865,7 @@ function renderChos(){
     phtml+='<td><span class="badge '+(p.activo?'b-T':'b-F')+'">'+(p.activo?'Activo':'Inactivo')+'</span></td>';
     phtml+='<td><button onclick="abrirModalPersona(\''+p.id+'\',\'personal\')" style="background:none;border:none;cursor:pointer">✏️</button> <button onclick="toggleActivo(\''+p.id+'\',\'personal\')" style="background:none;border:none;cursor:pointer;font-size:15px">'+(p.activo?'🔴':'🟢')+'</button></td></tr>';
   });
-  document.getElementById('per-tbody').innerHTML=phtml||'<tr><td colspan="4" style="text-align:center;padding:20px;color:#ccc">Sin personal. Agregá uno.</td></tr>';
+  document.getElementById('per-tbody').innerHTML=phtml||'<tr><td colspan="4" style="text-align:center;padding:20px;color:#ccc">Sin personal cargado</td></tr>';
 }
 
 function abrirModalPersona(id,tipo){
@@ -700,25 +878,21 @@ function abrirModalPersona(id,tipo){
   html+='<div class="modal-body">';
   html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
   html+='<label style="font-size:11px;font-weight:700">APELLIDO<br><input id="pf-ap" value="'+(obj?obj.ap:'')+'" placeholder="GONZALEZ" style="width:100%"></label>';
-  html+='<label style="font-size:11px;font-weight:700">NOMBRE<br><input id="pf-nom" value="'+(obj?obj.nom:'')+'" placeholder="ALICIO" style="width:100%"></label>';
-  if(esCho){
-    html+='<label style="font-size:11px;font-weight:700">TIPO<br><select id="pf-tipo" style="width:100%"><option value="auto"'+(obj&&obj.tipo==='auto'?' selected':'')+'>Auto</option><option value="combi"'+(obj&&obj.tipo==='combi'?' selected':'')+'>Combi</option></select></label>';
-  } else {
-    html+='<label style="font-size:11px;font-weight:700">SECTOR<br><input id="pf-sec" value="'+(obj&&obj.sec?obj.sec:'')+'" style="width:100%"></label>';
-  }
+  html+='<label style="font-size:11px;font-weight:700">NOMBRE<br><input id="pf-nom" value="'+(obj?obj.nom:'')+'" style="width:100%"></label>';
+  if(esCho){html+='<label style="font-size:11px;font-weight:700">TIPO<br><select id="pf-tipo" style="width:100%"><option value="auto"'+(obj&&obj.tipo==='auto'?' selected':'')+'>Auto</option><option value="combi"'+(obj&&obj.tipo==='combi'?' selected':'')+'>Combi</option></select></label>'}
+  else{html+='<label style="font-size:11px;font-weight:700">SECTOR<br><input id="pf-sec" value="'+(obj&&obj.sec?obj.sec:'')+'" style="width:100%"></label>'}
   html+='</div>';
   html+='<div style="display:flex;gap:8px;justify-content:flex-end">';
   html+='<button class="btn btn-red" onclick="guardarPersona(\''+(id||'')+'\',\''+tipo+'\')">💾 Guardar</button>';
   html+='<button class="btn btn-gray" onclick="cerrarCho()">Cancelar</button></div>';
   html+='</div></div></div>';
-  document.getElementById('cho-modal').innerHTML=html;
-  document.getElementById('cho-modal').style.display='block';
+  document.getElementById('cho-modal').innerHTML=html;document.getElementById('cho-modal').style.display='block';
 }
 
 function guardarPersona(id,tipo){
   var ap=(document.getElementById('pf-ap').value||'').trim().toUpperCase();
   var nom=(document.getElementById('pf-nom').value||'').trim().toUpperCase();
-  if(!ap||!nom)return alert('Apellido y nombre requeridos');
+  if(!ap)return alert('Apellido requerido');
   if(tipo==='chofer'){
     var chs=getChos();
     var ob={id:id||uid(),ap:ap,nom:nom,tipo:document.getElementById('pf-tipo').value,activo:true};
@@ -726,27 +900,22 @@ function guardarPersona(id,tipo){
     DB.save('choferes',chs);
   } else {
     var ps=getPers();
-    var sec=(document.getElementById('pf-sec')?document.getElementById('pf-sec').value:'');
+    var sec=document.getElementById('pf-sec')?document.getElementById('pf-sec').value:'';
     var op={id:id||uid(),ap:ap,nom:nom,sec:sec,activo:true};
     if(id){var pi=ps.findIndex(function(p){return p.id===id});if(pi>=0){op.activo=ps[pi].activo;ps[pi]=op}}else ps.push(op);
     DB.save('personal',ps);
   }
   cerrarCho();
 }
-
 function toggleActivo(id,tipo){
-  if(tipo==='chofer'){
-    var chs=getChos(),c=chs.find(function(x){return x.id===id});
-    if(c){c.activo=!c.activo;DB.save('choferes',chs);}
-  } else {
-    var ps=getPers(),p=ps.find(function(x){return x.id===id});
-    if(p){p.activo=!p.activo;DB.save('personal',ps);}
-  }
+  if(tipo==='chofer'){var chs=getChos(),c=chs.find(function(x){return x.id===id});if(c){c.activo=!c.activo;DB.save('choferes',chs)}}
+  else{var ps=getPers(),p=ps.find(function(x){return x.id===id});if(p){p.activo=!p.activo;DB.save('personal',ps)}}
   renderChos();
 }
 function cerrarCho(){document.getElementById('cho-modal').style.display='none';renderChos()}
 
-// ─── INIT ──────────────────────────────────────────────────
+// ── INIT ──────────────────────────────────────────────────────────────────────
+importarDatosExcel();
 renderRec();
 </script>
 </body>
