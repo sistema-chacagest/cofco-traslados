@@ -229,6 +229,8 @@ tfoot tr td{background:#f7f8fa;font-weight:700;border-top:2px solid var(--border
     <span class="tarifa-label">Base AUTO</span><input type="number" class="tarifa-input" id="tAuto" value="21698.58" step="0.01" onchange="recalcAll()">
     <div class="t-sep"></div>
     <span class="tarifa-label">Base COMBI</span><input type="number" class="tarifa-input" id="tCombi" value="43397.16" step="0.01" onchange="recalcAll()">
+    <div class="t-sep"></div>
+    <span class="tarifa-label">Parado de Planta</span><input type="number" class="tarifa-input" id="tPlanta" value="0" step="0.01" onchange="recalcAll()" placeholder="0.00">
   </div>
 
   <div class="toolbar">
@@ -373,22 +375,29 @@ function calcRow(r,t){
   const km=parseFloat(r.km)||0;
   const hb=parseFloat(r.hbEsp)||0;   // horas de espera facturadas AL CLIENTE
   const ce=parseFloat(r.costoExt)||0;
-  const base=r.tipo==='COMBI'?(t.combi||43397.16):(t.auto||21698.58);
+  const base=r.tipo==='COMBI'?(t.combi||43397.16):r.tipo==='PLANTA'?(parseFloat(t.planta)||0):(t.auto||21698.58);
   const kmV=km*(t.km||497.22);
   const espV=hb*(t.esp||3808.60);    // costo de espera para el CLIENTE
   r.kmV=kmV>0?f2(kmV):'';
   r.espV=espV>0?f2(espV):'';
-  if(km>0){r.imp=f2(kmV+espV);r.impTot=f2(kmV+espV+ce);}
-  else{r.imp=f2(base+espV);r.impTot=f2(base+espV+ce);}
+  // CORRECCIÓN: espV siempre se suma al importe, tanto con KM como sin KM
+  if(km>0){
+    r.imp=f2(kmV+espV);
+    r.impTot=f2(kmV+espV+ce);
+  } else {
+    const subtotal=base+espV;
+    r.imp=f2(subtotal);
+    r.impTot=f2(subtotal+ce);
+  }
 }
 
 function recalcAll(){const p=curP();if(!p)return;saveTarifas(p);p.rows.forEach(r=>calcRow(r,p.t));save();renderTable();updateStats();}
-function saveTarifas(p){if(!p.t)p.t={};p.t.km=parseFloat(document.getElementById('tKm').value)||497.22;p.t.esp=parseFloat(document.getElementById('tEsp').value)||3808.60;p.t.auto=parseFloat(document.getElementById('tAuto').value)||21698.58;p.t.combi=parseFloat(document.getElementById('tCombi').value)||43397.16;}
+function saveTarifas(p){if(!p.t)p.t={};p.t.km=parseFloat(document.getElementById('tKm').value)||497.22;p.t.esp=parseFloat(document.getElementById('tEsp').value)||3808.60;p.t.auto=parseFloat(document.getElementById('tAuto').value)||21698.58;p.t.combi=parseFloat(document.getElementById('tCombi').value)||43397.16;p.t.planta=parseFloat(document.getElementById('tPlanta').value)||0;}
 function updRec(id){const p=curP();if(!p)return;const r=p.rows.find(x=>x.id===id);if(!r)return;calcRow(r,p.t);save();renderRow(id);updateStats();}
 
 function renderAll(){renderPeriodBar();renderTarifas();renderTable();updateStats();}
 function renderPeriodBar(){const p=curP();if(!p)return;document.getElementById('pName').textContent=p.name;const badge=document.getElementById('pBadge');badge.textContent=p.closed?'CERRADO':'ABIERTO';badge.className='period-badge'+(p.closed?' closed':'');document.getElementById('pDates').textContent=p.closed?`Creado: ${fd(p.created)} · Cerrado: ${fd(p.closed)}`:`Creado: ${fd(p.created)}`;}
-function renderTarifas(){const p=curP();if(!p||!p.t)return;document.getElementById('tKm').value=p.t.km??497.22;document.getElementById('tEsp').value=p.t.esp??3808.60;document.getElementById('tAuto').value=p.t.auto??21698.58;document.getElementById('tCombi').value=p.t.combi??43397.16;document.getElementById('thKm').textContent='KM $'+(p.t.km??497.22)+'/km';document.getElementById('thEsp').textContent='ESPERA $'+(p.t.esp??3808.60)+'/h';}
+function renderTarifas(){const p=curP();if(!p||!p.t)return;document.getElementById('tKm').value=p.t.km??497.22;document.getElementById('tEsp').value=p.t.esp??3808.60;document.getElementById('tAuto').value=p.t.auto??21698.58;document.getElementById('tCombi').value=p.t.combi??43397.16;document.getElementById('tPlanta').value=p.t.planta??0;document.getElementById('thKm').textContent='KM $'+(p.t.km??497.22)+'/km';document.getElementById('thEsp').textContent='ESPERA $'+(p.t.esp??3808.60)+'/h';}
 
 function renderTable(){const p=curP();const tb=document.getElementById('tbody');if(!p){tb.innerHTML='';return;}const closed=!!p.closed;const q=searchQ.toLowerCase();const rows=q?p.rows.filter(r=>r.chofer.toLowerCase().includes(q)||r.detalle.toLowerCase().includes(q)):p.rows;document.getElementById('rowCount').textContent=rows.length+' registros';const dis=closed?'disabled':'';
 tb.innerHTML=rows.map((r,i)=>`<tr id="row_${r.id}">
@@ -398,7 +407,7 @@ tb.innerHTML=rows.map((r,i)=>`<tr id="row_${r.id}">
   <td><input class="ci mono" value="${esc(r.horario)}" placeholder="20:00" onchange="upd('${r.id}','horario',this.value)" ${dis}></td>
   <td><input class="ci" value="${esc(r.detalle)}" placeholder="Detalle del viaje..." onchange="upd('${r.id}','detalle',this.value)" ${dis}></td>
   <td><input class="ci mono td-r" style="text-align:right;color:var(--accent);font-weight:600" type="number" step="0.01" value="${r.costoExt}" placeholder="0" onchange="upd('${r.id}','costoExt',this.value);updRec('${r.id}')" ${dis}></td>
-  <td><select class="ci-sel" onchange="upd('${r.id}','tipo',this.value);updRec('${r.id}')" ${dis}><option value="AUTO" ${r.tipo==='AUTO'?'selected':''}>AUTO</option><option value="COMBI" ${r.tipo==='COMBI'?'selected':''}>COMBI</option></select></td>
+  <td><select class="ci-sel" onchange="upd('${r.id}','tipo',this.value);updRec('${r.id}')" ${dis}><option value="AUTO" ${r.tipo==='AUTO'?'selected':''}>AUTO</option><option value="COMBI" ${r.tipo==='COMBI'?'selected':''}>COMBI</option><option value="PLANTA" ${r.tipo==='PLANTA'?'selected':''}>PARADO PLANTA</option></select></td>
   <td><input class="ci mono" style="font-weight:600;color:var(--blue)" type="number" value="${r.km}" placeholder="0" onchange="upd('${r.id}','km',this.value);updRec('${r.id}')" ${dis}></td>
   <td><input class="ci mono" style="font-weight:600;color:var(--yellow)" type="number" step="0.5" value="${r.hbEsp}" placeholder="0" onchange="upd('${r.id}','hbEsp',this.value);updRec('${r.id}')" ${dis}></td>
   <td class="amt amt-importe td-r">${r.imp?'$'+fn(r.imp):'—'}</td>
@@ -443,6 +452,9 @@ function renderRecorridos(){
   const firstDay=new Date(year,month,1).getDay();
   const dim=new Date(year,month+1,0).getDate();
   const tod=new Date().toISOString().split('T')[0];
+
+  const copyBannerHtml=recCopySource?`<div style="background:#fef3c7;border:2px solid #d97706;border-radius:10px;padding:10px 16px;margin-bottom:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span style="font-size:13px;font-weight:700;color:#92400e">📋 MODO COPIAR ACTIVO — Día copiado: <strong>${fd(recCopySource)}</strong></span><span style="font-size:12px;color:#b45309">Hacé clic en un día destino para pegar.</span><button class="btn btn-sm" style="background:#dc2626;color:#fff;margin-left:auto" onclick="cancelarCopia()">✕ Cancelar copia</button></div>`:'';
+
   let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
     <div class="month-nav">
       <button class="btn btn-outline btn-sm" onclick="recPrevMonth()">‹</button>
@@ -454,6 +466,7 @@ function renderRecorridos(){
       <button class="btn btn-blue btn-sm" onclick="switchAppTab('liquidacion')">💰 Liquidación</button>
     </div>
   </div>
+  ${copyBannerHtml}
   <div class="dow-headers">
     <div class="dow-hdr dom">DOM</div><div class="dow-hdr">LUN</div><div class="dow-hdr">MAR</div>
     <div class="dow-hdr">MIÉ</div><div class="dow-hdr">JUE</div><div class="dow-hdr vie">VIE</div><div class="dow-hdr sab">SÁB</div>
@@ -465,20 +478,68 @@ function renderRecorridos(){
     const dn=getDayName(ds);
     const dd=recState.days[ds]||{choferes:{}};
     const isHoy=ds===tod;
+    const isCopySrc=ds===recCopySource;
     const hdrCls=dn==='domingo'?'domingo':dn==='sabado'?'sabado':dn==='viernes'?'viernes':'';
     const chs=Object.keys(dd.choferes);
     const hasTurnos=chs.length>0;
-    html+=`<div class="rec-day-card" style="${isHoy?'box-shadow:0 0 0 3px var(--accent);':''}" onclick="openDayModal('${ds}')">
+    const clickAction=recCopySource&&!isCopySrc?`pegarRecorrido('${ds}')`:`openDayModal('${ds}')`;
+    let cardStyle='';
+    if(isCopySrc)cardStyle='box-shadow:0 0 0 3px #d97706;';
+    else if(isHoy)cardStyle='box-shadow:0 0 0 3px var(--accent);';
+    html+=`<div class="rec-day-card" style="${cardStyle}${recCopySource&&!isCopySrc?'cursor:copy;':''}" onclick="${clickAction}">
       <div class="rec-day-header ${hdrCls}">
         <span style="font-size:13px">${dn.substring(0,3).toUpperCase()} ${d}</span>
-        ${hasTurnos?`<span style="font-size:10px;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:10px">${chs.length} chof</span>`:'<span style="font-size:11px;opacity:.6">+</span>'}
+        <div style="display:flex;gap:4px;align-items:center">
+          ${hasTurnos?`<span style="font-size:10px;background:rgba(255,255,255,.2);padding:1px 6px;border-radius:10px">${chs.length} chof</span>`:''}
+          ${isCopySrc?`<span style="font-size:9px;background:#d97706;color:#fff;padding:1px 6px;border-radius:8px">ORIGEN</span>`:''}
+          ${recCopySource&&!isCopySrc?`<span style="font-size:9px;background:rgba(255,200,0,.5);color:#92400e;padding:1px 5px;border-radius:8px">📋 PEGAR</span>`:''}
+          ${hasTurnos&&!recCopySource?`<span title="Copiar este día" style="font-size:11px;background:rgba(255,255,255,.25);padding:1px 5px;border-radius:8px;cursor:pointer" onclick="event.stopPropagation();iniciarCopia('${ds}')">📋</span>`:''}
+          ${!hasTurnos&&!recCopySource?'<span style="font-size:11px;opacity:.6">+</span>':''}
+        </div>
       </div>
-      ${hasTurnos?chs.map(c=>{const hs=Math.round((dd.choferes[c]||[]).reduce((s,t)=>s+parseHours(t.desde,t.hasta),0)*10)/10;return`<div style="padding:3px 8px;font-size:11px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between"><span style="font-weight:600">${c.split(' ')[0]}</span><span style="font-family:var(--font-mono);color:var(--accent)">${hs}h</span></div>`;}).join(''):`<div style="padding:12px;text-align:center;color:#d1d5db;font-size:22px">+</div>`}
+      ${hasTurnos?chs.map(c=>{const hs=Math.round((dd.choferes[c]||[]).reduce((s,t)=>s+parseHours(t.desde,t.hasta),0)*10)/10;return`<div style="padding:3px 8px;font-size:11px;border-bottom:1px solid #f0f2f5;display:flex;justify-content:space-between"><span style="font-weight:600">${c.split(' ')[0]}</span><span style="font-family:var(--font-mono);color:var(--accent)">${hs}h</span></div>`;}).join(''):`<div style="padding:12px;text-align:center;color:${recCopySource?'#d97706':'#d1d5db'};font-size:${recCopySource?'16px':'22px'}">${recCopySource?'📋 Pegar aquí':'+'}</div>`}
     </div>`;
   }
   html+=`</div>`;
   document.getElementById('app-recorridos').innerHTML=html;
 }
+
+// Estado de copia de recorrido
+let recCopySource=null;
+
+function iniciarCopia(dateStr){
+  recCopySource=dateStr;
+  renderRecorridos();
+  toast('Modo copia activado — seleccioná el día destino 📋','ok');
+}
+
+function cancelarCopia(){
+  recCopySource=null;
+  renderRecorridos();
+  toast('Copia cancelada','');
+}
+
+function pegarRecorrido(destDateStr){
+  if(!recCopySource)return;
+  const srcData=recState.days[recCopySource];
+  if(!srcData||!Object.keys(srcData.choferes||{}).length){
+    toast('El día origen no tiene recorridos cargados','err');
+    recCopySource=null;renderRecorridos();return;
+  }
+  const srcFd=fd(recCopySource),destFd=fd(destDateStr);
+  const destData=recState.days[destDateStr];
+  const tieneData=destData&&Object.keys(destData.choferes||{}).length>0;
+  const msg=tieneData
+    ?`\u00bfPegar el recorrido del ${srcFd} en el día ${destFd}?\n\u26a0 Se REEMPLAZARÁ lo que ya está cargado.`
+    :`\u00bfPegar el recorrido del ${srcFd} en el día ${destFd}?`;
+  if(!confirm(msg))return;
+  recState.days[destDateStr]=JSON.parse(JSON.stringify(srcData));
+  saveRec();
+  recCopySource=null;
+  renderRecorridos();
+  toast(`Recorrido del ${srcFd} pegado en ${destFd} ✓`,'ok');
+}
+
 
 function recPrevMonth(){recState.viewMonth--;if(recState.viewMonth<0){recState.viewMonth=11;recState.viewYear--;}renderRecorridos();}
 function recNextMonth(){recState.viewMonth++;if(recState.viewMonth>11){recState.viewMonth=0;recState.viewYear++;}renderRecorridos();}
@@ -530,6 +591,7 @@ function renderDayModal(){
       <div style="display:flex;gap:8px;align-items:center">
         <button class="btn btn-green btn-sm" onclick="downloadDayJPG()">📷 Descargar JPG</button>
         <button class="btn btn-blue btn-sm" onclick="copiarDiaAnterior('${dateStr}')">📋 Copiar día anterior</button>
+        <button class="btn btn-yellow btn-sm" onclick="closeM('dayModal');iniciarCopia('${dateStr}')">📋 Copiar este recorrido</button>
         <button class="x-btn" onclick="closeM('dayModal')">✕</button>
       </div>
     </div>
@@ -844,7 +906,7 @@ document.querySelectorAll('.modal-ov,.confirm-ov').forEach(el=>el.addEventListen
 (function preload(){
   const p=curP();
   if(!p||p.rows.length>0){renderAll();return;}
-  const tarifas={km:497.22,esp:3808.60,auto:21698.58,combi:43397.16};
+  const tarifas={km:497.22,esp:3808.60,auto:21698.58,combi:43397.16,planta:0};
   p.t=tarifas;
   p.name='FEBRERO - MARZO 2026';
   const raw=[
@@ -890,6 +952,16 @@ document.querySelectorAll('.modal-ov,.confirm-ov').forEach(el=>el.addEventListen
     {fecha:'2026-03-11',chofer:'BOLADO',horario:'10:00',detalle:'RETIRA AGUIRRE RAMON',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
     {fecha:'2026-03-11',chofer:'BOLADO',horario:'18:00',detalle:'INGRESA TORO HECTOR',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
     {fecha:'2026-03-11',chofer:'BARRERA',horario:'20:00',detalle:'RETIRA PALOMERO BAUTISTA, BEVILACKUA BENJAMIN, FERREYRA SAMUEL Y OREJON FRANCO',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-12',chofer:'REINA',horario:'02:00',detalle:'RETIRA ZALAZAR BRUNO, INSAURRALDE ALEJANDRO Y ROCHE MARCELO',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-12',chofer:'GONZALEZ',horario:'10:00',detalle:'RETIRA AGUIRRE',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-12',chofer:'BOLADO',horario:'18:00',detalle:'INGRESA TORO HECTOR',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-12',chofer:'REINA',horario:'20:00',detalle:'RETIRA HAILANT SEBASTIAN, CERUNDULO DAVID, SONDA, MONZON NICOLAS, RODRIGUEZ RENZO, ARGUELLO Y FERREYRA SAMUEL',costoExt:'',tipo:'COMBI',km:'',hbEsp:''},
+    {fecha:'2026-03-13',chofer:'BOLADO',horario:'18:00',detalle:'INGRESA TORO HECTOR',costoExt:'',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-13',chofer:'BOLADO',horario:'20:00',detalle:'RETIRA ZALAZAR ESTEBAN, BEVILACQUA BENJAMIN Y FERREYRA SAMUEL',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-14',chofer:'GONZALEZ',horario:'02:00',detalle:'RETIRA ZALAZAR BRUNO E INSAURRALDE ALEJANDRO',costoExt:'5646.73',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-14',chofer:'BARRERA',horario:'10:00',detalle:'RETIRA THIAGO VERA, LUCARENA ULISES Y FIORITTI MARCELO',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-14',chofer:'BARRERA',horario:'16:00',detalle:'RETIRA ROZUADONSQUEY CLARA, HAILANT SEBASTIAN Y ARGUELLO',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''},
+    {fecha:'2026-03-14',chofer:'BARRERA',horario:'20:00',detalle:'RETIRA MACHELLO AGUSTIN, FERREYRA SAMUEL Y PALOMERO BAUTISTA',costoExt:'11293.46',tipo:'AUTO',km:'',hbEsp:''}
   ];
   raw.forEach(r=>{const row=newRow();Object.assign(row,r);calcRow(row,tarifas);p.rows.push(row);});
   save();renderAll();
